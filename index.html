@@ -77,9 +77,9 @@
             display: block; 
         }
 
-        /* AJUSTE DA ASSINATURA: Tamanho reduzido para 60px para maior fidelidade ao modelo */
+        /* AJUSTE DA ASSINATURA: 45px para ficar igual ao modelo Word */
         .signature-img { 
-            max-height: 60px; 
+            max-height: 45px; 
             width: auto; 
             display: block; 
             margin: 0 auto; 
@@ -103,7 +103,7 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Ajuste de Assinatura ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Fidelidade ao Modelo ✨</p>
         </header>
         
         <div class="space-y-6">
@@ -115,17 +115,17 @@
             
             <!-- 2. Status das Imagens -->
             <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                <label class="block text-[10px] font-bold text-blue-500 uppercase mb-1">2. Ficheiros de Imagem</label>
-                <div class="text-[10px] space-y-1 text-blue-700">
+                <label class="block text-[10px] font-bold text-blue-500 uppercase mb-1">2. Ficheiros Automáticos</label>
+                <div class="text-[10px] space-y-1 text-blue-700 font-medium">
                     <p id="status-h">• Cabeçalho: Procurando...</p>
                     <p id="status-f">• Rodapé: Procurando...</p>
                     <p id="status-s">• Assinatura: Procurando...</p>
                 </div>
                 <hr class="border-blue-200">
-                <p class="text-[9px] text-blue-400 italic">Mudar manualmente:</p>
-                <input type="file" id="headIn" class="w-full text-[10px]" title="Mudar Cabeçalho">
-                <input type="file" id="footIn" class="w-full text-[10px]" title="Mudar Rodapé">
-                <input type="file" id="signIn" class="w-full text-[10px]" title="Mudar Assinatura">
+                <p class="text-[9px] text-blue-400 italic">Trocar manualmente:</p>
+                <input type="file" id="headIn" class="w-full text-[10px]">
+                <input type="file" id="footIn" class="w-full text-[10px]">
+                <input type="file" id="signIn" class="w-full text-[10px]">
             </div>
 
             <!-- 3. Configurações -->
@@ -146,7 +146,7 @@
 
             <!-- 4. Busca -->
             <div class="pt-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Pesquisar Registro</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Selecionar Registro</label>
                 <input type="text" id="searchBox" placeholder="Carregue o CSV primeiro..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
                 <div id="results" class="mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden"></div>
             </div>
@@ -154,12 +154,12 @@
             <!-- Botão Imprimir -->
             <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                IMPRIMIR DOCUMENTO
+                IMPRIMIR AGORA
             </button>
         </div>
     </div>
 
-    <!-- Área de Visualização no Navegador -->
+    <!-- Preview no Navegador -->
     <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
         <div id="canvas" class="a4-preview hidden">
             <div id="vHeader"></div>
@@ -169,8 +169,9 @@
                 <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                 <div id="vDate" class="text-right text-lg mt-12"></div>
                 
-                <div class="mt-24 flex flex-col items-center">
-                    <div id="vSign" class="mb-[-15px] z-10"></div>
+                <!-- Área de Assinatura -->
+                <div class="mt-32 flex flex-col items-center">
+                    <div id="vSign" class="mb-[-12px] z-10 h-[45px] flex items-end"></div>
                     <div class="w-80 border-t border-black"></div>
                     <div class="text-center mt-3">
                         <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
@@ -187,12 +188,12 @@
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
-            <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 5mm;">DECLARAÇÃO</div>
+            <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
             <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
             <div id="pDate" class="text-right text-[14pt] mt-12"></div>
             
-            <div class="flex flex-col items-center" style="margin-top: 30mm;">
-                <div id="pSign" class="mb-[-15px] z-10"></div>
+            <div class="flex flex-col items-center" style="margin-top: 40mm;">
+                <div id="pSign" class="mb-[-12px] z-10 h-[45px] flex items-end"></div>
                 <div class="w-80 border-t border-black"></div>
                 <div class="text-center mt-3">
                     <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
@@ -249,7 +250,7 @@
                     return c.length >= 2 ? { a: c[0].trim(), m: c[1].trim() } : null;
                 }).filter(Boolean);
                 $('searchBox').disabled = false;
-                $('searchBox').placeholder = "Pesquisar por nome...";
+                $('searchBox').placeholder = "Pesquisar registro...";
             };
             r.readAsText(e.target.files[0]);
         };
@@ -259,7 +260,7 @@
                 const r = new FileReader();
                 r.onload = ev => { 
                     imgs[key] = ev.target.result;
-                    $(statusId).innerText = `• ${label}: Carregado (Manual) 🔄`;
+                    $(statusId).innerText = `• ${label}: Manual ✅`;
                     render(); 
                 };
                 r.readAsDataURL(e.target.files[0]);
