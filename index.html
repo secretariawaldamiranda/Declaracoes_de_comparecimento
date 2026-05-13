@@ -230,17 +230,33 @@
             fetch('CUBO.CSV')
                 .then(r => r.text())
                 .then(text => {
-                    const lines = text.split('\n');
+                    const lines = text.split('\n').filter(line => line.trim() !== "");
+                    if (lines.length < 1) return;
+
+                    const header = lines[0].toLowerCase();
+                    // Verifica se é o formato novo (4 colunas) ou antigo (2 colunas)
+                    const isNewFormat = header.includes('pai') || header.includes('responsável');
+
                     db = lines.slice(1).map(l => {
                         const c = l.split(';');
-                        // Ordem no ficheiro: Aluno(0); Pai(1); Mãe(2); Responsável(3)
-                        return c.length >= 2 ? {
-                            a: c[0].trim(),
-                            p: c[1] ? c[1].trim() : "",
-                            m: c[2] ? c[2].trim() : "",
-                            r: c[3] ? c[3].trim() : ""
-                        } : null;
-                    }).filter(Boolean);
+                        if (isNewFormat) {
+                            // Ordem no ficheiro novo: Aluno(0); Pai(1); Mãe(2); Responsável(3)
+                            return {
+                                a: c[0]?.trim() || "",
+                                p: c[1]?.trim() || "",
+                                m: c[2]?.trim() || "",
+                                r: c[3]?.trim() || ""
+                            };
+                        } else {
+                            // Ordem no ficheiro antigo: Aluno(0); Mãe(1)
+                            return {
+                                a: c[0]?.trim() || "",
+                                p: "",
+                                m: c[1]?.trim() || "",
+                                r: ""
+                            };
+                        }
+                    }).filter(item => item.a !== "");
                     
                     if (db.length > 0) {
                         $('searchBox').disabled = false;
