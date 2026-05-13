@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Declaração Escolar - Versão Final</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+
+        /* Estilos de Impressão */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            
+            body { background: white; margin: 0; padding: 0; }
+            
+            .print-page {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                background: white;
+            }
+
+            /* Espaçamento no topo para não cortar o cabeçalho */
+            .header-print-container {
+                padding-top: 15mm; /* Margem de segurança superior */
+                width: 100%;
+            }
+
+            .footer-print-container {
+                margin-top: auto;
+                width: 100%;
+                padding-bottom: 5mm;
+            }
+        }
+
+        /* Estilos de Tela (Preview) */
+        .print-only { display: none; }
+        
+        .a4-preview {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 2rem auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .header-preview { padding-top: 10mm; width: 100%; }
+        .content-padding { padding: 10mm 25mm; flex-grow: 1; }
+        
+        .img-fluid { width: 100%; height: auto; display: block; }
+        .signature-img { max-height: 120px; width: auto; display: block; margin: 0 auto; }
+
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Interface Lateral -->
+    <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
+        <h1 class="text-2xl font-bold text-slate-800 mb-2">Declarações</h1>
+        <p class="text-xs text-slate-400 mb-6 uppercase font-bold tracking-wider">Unidade Escolar Oficial</p>
+        
+        <div class="space-y-6">
+            <!-- Arquivo CSV -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">1. Base de Alunos (CSV)</label>
+                <input type="file" id="csvFile" accept=".csv" class="w-full text-xs file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            </div>
+
+            <!-- Upload de Imagens -->
+            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-4">
+                <h3 class="text-xs font-bold text-blue-800 uppercase">2. Papel Timbrado & Assinatura</h3>
+                <div>
+                    <label class="text-[10px] font-bold text-blue-400 block mb-1">Cabeçalho (Topo)</label>
+                    <input type="file" id="headIn" accept="image/*" class="w-full text-[10px]">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-blue-400 block mb-1">Rodapé (Base)</label>
+                    <input type="file" id="footIn" accept="image/*" class="w-full text-[10px]">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-blue-400 block mb-1">Assinatura Digital</label>
+                    <input type="file" id="signIn" accept="image/*" class="w-full text-[10px]">
+                </div>
+            </div>
+
+            <!-- Configurações Rápidas -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Data</label>
+                    <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded p-2 mt-1">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Turno</label>
+                    <select id="docShift" class="w-full text-sm border border-slate-200 rounded p-2 mt-1">
+                        <option value="matutino">Matutino</option>
+                        <option value="vespertino" selected>Vespertino</option>
+                        <option value="noturno">Noturno</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- Busca Gemini -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">3. Pesquisar Nome</label>
+                <div class="relative">
+                    <input type="text" id="searchBox" placeholder="Carregue o CSV primeiro..." class="w-full border-2 border-slate-100 rounded-xl p-3 focus:border-blue-500 outline-none transition-all" disabled>
+                    <div id="results" class="absolute z-10 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto hidden"></div>
+                </div>
+            </div>
+
+            <!-- IA Gemini -->
+            <div id="aiBox" class="hidden animate-pulse-once">
+                <div class="bg-indigo-600 rounded-xl p-4 text-white">
+                    <h3 class="text-[10px] font-bold mb-2 flex items-center gap-1">✨ IA GEMINI ASSISTANT</h3>
+                    <textarea id="aiReasonInput" placeholder="Motivo curto... (ex: saúde)" class="w-full text-xs p-2 rounded text-slate-900 mb-2 h-16 outline-none"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="askGemini('justify')" id="btnAiJ" class="flex-1 bg-white/20 hover:bg-white/30 py-2 rounded text-[10px] font-bold flex items-center justify-center gap-1">
+                            <span id="txtJ">Justificar</span>
+                            <div id="ldJ" class="loader hidden !border-white"></div>
+                        </button>
+                        <button onclick="askGemini('translate')" id="btnAiT" class="flex-1 bg-white/20 hover:bg-white/30 py-2 rounded text-[10px] font-bold">Traduzir ES</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÃO IMPRIMIR -->
+            <button onclick="triggerPrint()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:animate-bounce"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                IMPRIMIR AGORA
+            </button>
+        </div>
+    </div>
+
+    <!-- Preview Central (Apenas Tela) -->
+    <div class="lg:ml-80 flex justify-center no-print">
+        <div id="canvas" class="a4-preview hidden">
+            <!-- Cabeçalho -->
+            <div id="vHeader" class="header-preview"></div>
+            
+            <div class="content-padding">
+                <div class="text-center font-bold text-2xl mb-12 underline tracking-widest uppercase">DECLARAÇÃO</div>
+                <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
+                <div id="vDate" class="text-right text-lg mt-12"></div>
+                
+                <div class="mt-24 flex flex-col items-center">
+                    <div id="vSign" class="mb-[-20px] z-10"></div>
+                    <div class="w-80 border-t border-black"></div>
+                    <div class="text-center mt-3">
+                        <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
+                        <p class="text-slate-600">Diretora</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé -->
+            <div id="vFooter" class="mt-auto"></div>
+        </div>
+        
+        <div id="placeholder" class="mt-20 text-slate-300 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" /></svg>
+            <p class="text-xl font-medium">Carregue o arquivo CUBO.CSV e selecione um aluno</p>
+        </div>
+    </div>
+
+    <!-- ÁREA DE IMPRESSÃO REAL (Oculta na Tela) -->
+    <div id="printZone" class="print-only print-page">
+        <!-- Margem superior via CSS -->
+        <div id="pHeader" class="header-print-container"></div>
+        
+        <div class="content-padding" style="margin-top: 10mm;">
+            <div class="text-center font-bold text-2xl mb-12 underline tracking-widest uppercase">DECLARAÇÃO</div>
+            <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
+            <div id="pDate" class="text-right text-[14pt] mt-12"></div>
+            
+            <div class="flex flex-col items-center" style="margin-top: 30mm;">
+                <div id="pSign" class="mb-[-20px] z-10"></div>
+                <div class="w-80 border-t border-black"></div>
+                <div class="text-center mt-3">
+                    <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
+                    <p class="text-[12pt]">Diretora</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="pFooter" class="footer-print-container mt-auto"></div>
+    </div>
+
+    <script>
+        const apiKey = ""; // Ambiente preencherá
+        let db = [];
+        let selected = null;
+        let images = { head: '', foot: '', sign: '' };
+        let customReason = "";
+
+        const $ = (id) => document.getElementById(id);
+
+        // 1. CSV Logic
+        $('csvFile').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const lines = ev.target.result.split('\n');
+                db = lines.slice(1).map(l => {
+                    const c = l.split(';');
+                    return c.length >= 2 ? { aluno: c[0].trim(), mae: c[1].trim() } : null;
+                }).filter(Boolean);
+                $('searchBox').disabled = false;
+                $('searchBox').placeholder = "Digite nome do Aluno ou Mãe...";
+            };
+            reader.readAsText(e.target.files[0]);
+        };
+
+        // 2. Image Handlers
+        const bindImg = (id, key) => {
+            $(id).onchange = e => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    images[key] = ev.target.result;
+                    update();
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            };
+        };
+        bindImg('headIn', 'head');
+        bindImg('footIn', 'foot');
+        bindImg('signIn', 'sign');
+
+        // 3. Search Logic
+        $('searchBox').oninput = function() {
+            const val = this.value.toLowerCase();
+            const resDiv = $('results');
+            if (val.length < 2) return resDiv.classList.add('hidden');
+            
+            const matches = db.filter(i => i.aluno.toLowerCase().includes(val) || i.mae.toLowerCase().includes(val)).slice(0, 5);
+            resDiv.innerHTML = '';
+            resDiv.classList.toggle('hidden', matches.length === 0);
+            
+            matches.forEach(m => {
+                const row = document.createElement('div');
+                row.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 transition-colors";
+                row.innerHTML = `<div class="font-bold text-slate-800">${m.aluno}</div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${m.mae}</div>`;
+                row.onclick = () => {
+                    selected = m;
+                    customReason = "";
+                    resDiv.classList.add('hidden');
+                    $('searchBox').value = m.aluno;
+                    $('canvas').classList.remove('hidden');
+                    $('placeholder').classList.add('hidden');
+                    $('aiBox').classList.remove('hidden');
+                    update();
+                };
+                resDiv.appendChild(row);
+            });
+        };
+
+        // 4. Render Document
+        function update(textOverride = null) {
+            if (!selected) return;
+
+            const d = $('docDate').value || new Date().toISOString().split('T')[0];
+            const shift = $('docShift').value;
+            const months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const [y, m, day] = d.split('-');
+            const fullDate = `${day} de ${months[parseInt(m)-1]} de ${y}`;
+
+            const reason = customReason || `resolver assuntos relacionados a <strong>${selected.aluno}</strong>`;
+            
+            const content = textOverride || `
+                Declaro para os devidos fins legais que, <strong>${selected.mae}</strong>, 
+                compareceu nesta Unidade Escolar no dia <strong>${fullDate}</strong>, 
+                no turno <strong>${shift}</strong>, para ${reason}.
+                <p style="margin-top: 40px;">Por ser verdade assino a presente declaração.</p>
+            `;
+
+            const dateFooter = `Formosa-GO, ${fullDate}.`;
+
+            // UI & Print Updates
+            ['v', 'p'].forEach(pre => {
+                $(pre + 'Body').innerHTML = content;
+                $(pre + 'Date').innerText = dateFooter;
+                $(pre + 'Header').innerHTML = images.head ? `<img src="${images.head}" class="img-fluid">` : '';
+                $(pre + 'Footer').innerHTML = images.foot ? `<img src="${images.foot}" class="img-fluid">` : '';
+                $(pre + 'Sign').innerHTML = images.sign ? `<img src="${images.sign}" class="signature-img">` : '';
+            });
+        }
+
+        // 5. Gemini AI Functions
+        async function askGemini(type) {
+            const input = $('aiReasonInput').value;
+            if (!selected) return;
+            
+            const btnText = $('txtJ');
+            const loader = $('ldJ');
+            btnText.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                let prompt = "";
+                if (type === 'justify') {
+                    prompt = `Aja como secretário escolar. Expanda de forma muito formal o motivo "${input}" para o aluno "${selected.aluno}". Responda apenas a frase iniciando com "para...", sem aspas.`;
+                } else {
+                    prompt = `Traduza para espanhol formal a seguinte declaração escolar: "${$('vBody').innerText}". Retorne apenas o texto traduzido.`;
+                }
+
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const json = await resp.json();
+                const result = json.candidates[0].content.parts[0].text.trim();
+
+                if (type === 'justify') {
+                    customReason = result;
+                    update();
+                } else {
+                    update(result.replace(/\n/g, '<br>'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao conectar com a IA. Verifique sua conexão.");
+            } finally {
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+
+        // 6. Print Trigger
+        function triggerPrint() {
+            if (!selected) {
+                alert("Por favor, selecione um aluno antes de imprimir.");
+                return;
+            }
+            window.print();
+        }
+
+        // Init
+        $('docDate').value = new Date().toISOString().split('T')[0];
+        $('docDate').onchange = () => update();
+        $('docShift').onchange = () => update();
+
+    </script>
+</body>
+</html>
