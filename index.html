@@ -83,6 +83,18 @@
             display: block; 
             margin: 0 auto; 
         }
+
+        /* Fallback para quando a imagem não existe */
+        .img-placeholder {
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -91,7 +103,7 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Memória Ativa Ativada ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Configuração Automática ✨</p>
         </header>
         
         <div class="space-y-6">
@@ -101,25 +113,19 @@
                 <input type="file" id="csvFile" accept=".csv" class="w-full text-xs">
             </div>
             
-            <!-- 2. Carregar Imagens -->
+            <!-- 2. Status das Imagens -->
             <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                <div class="flex justify-between items-center mb-1">
-                    <label class="block text-[10px] font-bold text-blue-500 uppercase">2. Papel Timbrado & Assinatura</label>
-                    <button onclick="clearStoredImages()" class="text-[9px] text-red-500 font-bold hover:underline">Limpar Salvas</button>
+                <label class="block text-[10px] font-bold text-blue-500 uppercase mb-1">2. Ficheiros de Imagem</label>
+                <div class="text-[10px] space-y-1 text-blue-700">
+                    <p id="status-h">• Cabeçalho: Procurando...</p>
+                    <p id="status-f">• Rodapé: Procurando...</p>
+                    <p id="status-s">• Assinatura: Procurando...</p>
                 </div>
-                <div>
-                    <span class="text-[9px] text-blue-400 font-bold block uppercase">Cabeçalho</span>
-                    <input type="file" id="headIn" class="w-full text-[10px]">
-                </div>
-                <div>
-                    <span class="text-[9px] text-blue-400 font-bold block uppercase">Rodapé</span>
-                    <input type="file" id="footIn" class="w-full text-[10px]">
-                </div>
-                <div>
-                    <span class="text-[9px] text-blue-400 font-bold block uppercase">Assinatura Digital</span>
-                    <input type="file" id="signIn" class="w-full text-[10px]">
-                </div>
-                <p class="text-[9px] text-blue-400 italic">* As imagens ficam salvas neste navegador.</p>
+                <hr class="border-blue-200">
+                <p class="text-[9px] text-blue-400 italic">Para alterar as imagens padrão, selecione novos ficheiros abaixo:</p>
+                <input type="file" id="headIn" class="w-full text-[10px]" title="Mudar Cabeçalho">
+                <input type="file" id="footIn" class="w-full text-[10px]" title="Mudar Rodapé">
+                <input type="file" id="signIn" class="w-full text-[10px]" title="Mudar Assinatura">
             </div>
 
             <!-- 3. Configurações -->
@@ -140,8 +146,8 @@
 
             <!-- 4. Busca -->
             <div class="pt-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Selecionar Registro</label>
-                <input type="text" id="searchBox" placeholder="Pesquisar aluno ou mãe..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Pesquisar Aluno ou Mãe</label>
+                <input type="text" id="searchBox" placeholder="Carregue o CSV primeiro..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
                 <div id="results" class="mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden"></div>
             </div>
 
@@ -180,12 +186,10 @@
     <!-- ÁREA DE IMPRESSÃO REAL -->
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
-        
         <div class="content-print-area">
             <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 5mm;">DECLARAÇÃO</div>
             <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
             <div id="pDate" class="text-right text-[14pt] mt-12"></div>
-            
             <div class="flex flex-col items-center" style="margin-top: 30mm;">
                 <div id="pSign" class="mb-[-20px] z-10"></div>
                 <div class="w-80 border-t border-black"></div>
@@ -195,32 +199,50 @@
                 </div>
             </div>
         </div>
-        
         <div id="pFooter" class="footer-print-area"></div>
     </div>
 
     <script>
         let db = [];
         let selected = null;
-        let imgs = { h: '', s: '', f: '' };
+        // Caminhos padrão que o GitHub Pages vai tentar carregar
+        let imgs = { 
+            h: 'cabecalho.png', 
+            s: 'assinatura.png', 
+            f: 'rodape.png' 
+        };
 
         const $ = (id) => document.getElementById(id);
 
-        // Inicialização: Tentar carregar imagens salvas
+        // Ao abrir, verifica se as imagens padrão existem no servidor (GitHub)
         window.onload = () => {
-            const savedH = localStorage.getItem('img_header');
-            const savedF = localStorage.getItem('img_footer');
-            const savedS = localStorage.getItem('img_sign');
-
-            if (savedH) imgs.h = savedH;
-            if (savedF) imgs.f = savedF;
-            if (savedS) imgs.s = savedS;
-
-            // Se já houver algo salvo, podemos mostrar o canvas vazio ou aguardar o CSV
-            // Por padrão, mantemos oculto até o primeiro registro ser selecionado.
-            
+            checkAndLoadDefaultImages();
             $('docDate').value = new Date().toISOString().split('T')[0];
         };
+
+        function checkAndLoadDefaultImages() {
+            const targets = [
+                { key: 'h', path: 'cabecalho.png', status: 'status-h', label: 'Cabeçalho' },
+                { key: 'f', path: 'rodape.png', status: 'status-f', label: 'Rodapé' },
+                { key: 's', path: 'assinatura.png', status: 'status-s', label: 'Assinatura' }
+            ];
+
+            targets.forEach(t => {
+                const img = new Image();
+                img.onload = () => {
+                    $(t.status).innerText = `• ${t.label}: Carregado ✅`;
+                    $(t.status).classList.add('text-green-600');
+                    render();
+                };
+                img.onerror = () => {
+                    $(t.status).innerText = `• ${t.label}: Não encontrado ❌`;
+                    $(t.status).classList.add('text-red-400');
+                    imgs[t.key] = ''; // Limpa se falhar
+                    render();
+                };
+                img.src = t.path;
+            });
+        }
 
         // Processar CSV
         $('csvFile').onchange = (e) => {
@@ -237,40 +259,22 @@
             r.readAsText(e.target.files[0]);
         };
 
-        // Carregar Imagens e Salvar no Storage
-        const bindImage = (id, key, storageKey) => {
+        // Upload Manual (para substituir as padrão se necessário)
+        const bindManualUpload = (id, key, statusId, label) => {
             $(id).onchange = e => {
                 const r = new FileReader();
                 r.onload = ev => { 
-                    const dataUrl = ev.target.result;
-                    imgs[key] = dataUrl;
-                    
-                    // Guardar no navegador
-                    try {
-                        localStorage.setItem(storageKey, dataUrl);
-                    } catch (err) {
-                        console.warn("Imagem muito grande para guardar no navegador. Funcionará apenas nesta sessão.");
-                    }
-                    
+                    imgs[key] = ev.target.result;
+                    $(statusId).innerText = `• ${label}: Carregado (Manual) 🔄`;
                     render(); 
                 };
                 r.readAsDataURL(e.target.files[0]);
             };
         };
 
-        bindImage('headIn', 'h', 'img_header'); 
-        bindImage('signIn', 's', 'img_sign'); 
-        bindImage('footIn', 'f', 'img_footer');
-
-        function clearStoredImages() {
-            if (confirm("Deseja remover as imagens guardadas no navegador?")) {
-                localStorage.removeItem('img_header');
-                localStorage.removeItem('img_footer');
-                localStorage.removeItem('img_sign');
-                imgs = { h: '', s: '', f: '' };
-                render();
-            }
-        }
+        bindManualUpload('headIn', 'h', 'status-h', 'Cabeçalho'); 
+        bindManualUpload('signIn', 's', 'status-s', 'Assinatura'); 
+        bindManualUpload('footIn', 'f', 'status-f', 'Rodapé');
 
         // Busca
         $('searchBox').oninput = function() {
@@ -311,8 +315,8 @@
             ['v', 'p'].forEach(prefix => {
                 $(prefix + 'Body').innerHTML = content;
                 $(prefix + 'Date').innerText = dateLine;
-                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '';
-                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '';
+                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '<div class="img-placeholder h-32">Cabeçalho não encontrado</div>';
+                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '<div class="img-placeholder h-20">Rodapé não encontrado</div>';
                 $(prefix + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
             });
         }
