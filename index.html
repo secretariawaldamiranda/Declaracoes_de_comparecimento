@@ -86,28 +86,28 @@
 </head>
 <body>
 
-    <!-- Menu de Controle Lateral (Simplificado) -->
+    <!-- Menu Lateral Simplificado -->
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
         <header class="mb-10 text-center">
             <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Emissor de Declarações</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Identificação de Turno Ativa ✨</p>
         </header>
         
         <div class="space-y-8">
             
-            <!-- Configurações de Data e Turno -->
+            <!-- Configurações Automáticas -->
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Configurações</h3>
                 <div class="grid grid-cols-1 gap-4">
                     <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data de Comparecimento</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
                         <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
                     </div>
                     <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno</label>
-                        <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno (Auto-detectado)</label>
+                        <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 font-medium">
                             <option value="matutino">Matutino</option>
-                            <option value="vespertino" selected>Vespertino</option>
+                            <option value="vespertino">Vespertino</option>
                             <option value="noturno">Noturno</option>
                         </select>
                     </div>
@@ -118,27 +118,21 @@
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
                 <div class="relative">
-                    <input type="text" id="searchBox" placeholder="Digite nome do Aluno ou Mãe..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
+                    <input type="text" id="searchBox" placeholder="Aguardando base..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
                     <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
                 </div>
             </div>
 
             <div class="pt-6 border-t border-slate-100">
-                <!-- Botão de Impressão -->
                 <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     IMPRIMIR
                 </button>
             </div>
-            
-            <!-- Status Discreto (Apenas para controle interno) -->
-            <div class="pt-4 opacity-0 group hover:opacity-100 transition-opacity text-[9px] text-slate-400 text-center">
-                <p id="status-debug">Automação ativa</p>
-            </div>
         </div>
     </div>
 
-    <!-- Visualização no Navegador -->
+    <!-- Preview Navegador -->
     <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
         <div id="canvas" class="a4-preview hidden">
             <div id="vHeader"></div>
@@ -161,7 +155,6 @@
             <div id="vFooter"></div>
         </div>
 
-        <!-- Mensagem quando nada está selecionado -->
         <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-32">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -170,7 +163,7 @@
         </div>
     </div>
 
-    <!-- ÁREA DE IMPRESSÃO -->
+    <!-- Área de Impressão -->
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
@@ -199,21 +192,31 @@
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
+            detectCurrentShift(); // Detectar turno antes de carregar o resto
             checkAndLoadDefaultImages();
             checkAndLoadDefaultCSV();
             $('docDate').value = new Date().toISOString().split('T')[0];
         };
 
+        // Função para detectar o turno atual
+        function detectCurrentShift() {
+            const hour = new Date().getHours();
+            let shift = "noturno"; // Padrão caso seja madrugada
+
+            if (hour >= 5 && hour < 12) {
+                shift = "matutino";
+            } else if (hour >= 12 && hour < 18) {
+                shift = "vespertino";
+            }
+
+            $('docShift').value = shift;
+        }
+
         function checkAndLoadDefaultCSV() {
             fetch('CUBO.CSV')
-                .then(response => {
-                    if (!response.ok) throw new Error();
-                    return response.text();
-                })
+                .then(response => response.text())
                 .then(text => parseCSV(text))
-                .catch(() => {
-                    console.error("Base automática não encontrada.");
-                });
+                .catch(() => console.error("Base automática não encontrada."));
         }
 
         function parseCSV(text) {
@@ -230,19 +233,11 @@
         }
 
         function checkAndLoadDefaultImages() {
-            const targets = [
-                { key: 'h', path: 'cabecalho.png' },
-                { key: 'f', path: 'rodape.png' },
-                { key: 's', path: 'assinatura.png' }
-            ];
-
+            const targets = [{ key: 'h', path: 'cabecalho.png' }, { key: 'f', path: 'rodape.png' }, { key: 's', path: 'assinatura.png' }];
             targets.forEach(t => {
                 const img = new Image();
                 img.onload = () => render();
-                img.onerror = () => {
-                    imgs[t.key] = '';
-                    render();
-                };
+                img.onerror = () => { imgs[t.key] = ''; render(); };
                 img.src = t.path;
             });
         }
