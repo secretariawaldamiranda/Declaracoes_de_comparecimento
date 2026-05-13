@@ -77,7 +77,7 @@
             display: block; 
         }
 
-        /* AJUSTE DA ASSINATURA: Altura de 45px e alinhamento refinado */
+        /* AJUSTE DA ASSINATURA: Altura de 45px */
         .signature-img { 
             max-height: 45px; 
             width: auto; 
@@ -103,7 +103,7 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Ajuste de Assinatura ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Ajuste de Camadas ✨</p>
         </header>
         
         <div class="space-y-6">
@@ -171,9 +171,10 @@
                 
                 <!-- Área de Assinatura -->
                 <div class="mt-32 flex flex-col items-center">
-                    <!-- mb-[5px] para subir a assinatura e não comer a linha -->
-                    <div id="vSign" class="mb-[5px] z-10 h-[45px] flex items-end"></div>
-                    <div class="w-80 border-t border-black"></div>
+                    <!-- z-0 para ficar atrás da linha e margin negativa para sobrepor -->
+                    <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
+                    <!-- z-10 para a linha ficar à frente da assinatura -->
+                    <div class="w-80 border-t border-black relative z-10"></div>
                     <div class="text-center mt-3">
                         <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
                         <p class="text-slate-500">Diretora</p>
@@ -194,9 +195,10 @@
             <div id="pDate" class="text-right text-[14pt] mt-12"></div>
             
             <div class="flex flex-col items-center" style="margin-top: 40mm;">
-                <!-- mb-[5px] para subir a assinatura e não comer a linha -->
-                <div id="pSign" class="mb-[5px] z-10 h-[45px] flex items-end"></div>
-                <div class="w-80 border-t border-black"></div>
+                <!-- z-0 para ficar atrás da linha e margin negativa para sobrepor -->
+                <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
+                <!-- z-10 para a linha ficar à frente da assinatura -->
+                <div class="w-80 border-t border-black relative z-10"></div>
                 <div class="text-center mt-3">
                     <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
                     <p class="text-[12pt]">Diretora</p>
