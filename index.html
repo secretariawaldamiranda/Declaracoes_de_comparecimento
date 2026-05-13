@@ -77,14 +77,14 @@
             display: block; 
         }
 
+        /* AJUSTE DA ASSINATURA: Tamanho reduzido para 60px para maior fidelidade ao modelo */
         .signature-img { 
-            max-height: 100px; 
+            max-height: 60px; 
             width: auto; 
             display: block; 
             margin: 0 auto; 
         }
 
-        /* Fallback para quando a imagem não existe */
         .img-placeholder {
             border: 1px dashed #cbd5e1;
             background: #f8fafc;
@@ -103,7 +103,7 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Configuração Automática ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Ajuste de Assinatura ✨</p>
         </header>
         
         <div class="space-y-6">
@@ -122,7 +122,7 @@
                     <p id="status-s">• Assinatura: Procurando...</p>
                 </div>
                 <hr class="border-blue-200">
-                <p class="text-[9px] text-blue-400 italic">Para alterar as imagens padrão, selecione novos ficheiros abaixo:</p>
+                <p class="text-[9px] text-blue-400 italic">Mudar manualmente:</p>
                 <input type="file" id="headIn" class="w-full text-[10px]" title="Mudar Cabeçalho">
                 <input type="file" id="footIn" class="w-full text-[10px]" title="Mudar Rodapé">
                 <input type="file" id="signIn" class="w-full text-[10px]" title="Mudar Assinatura">
@@ -146,7 +146,7 @@
 
             <!-- 4. Busca -->
             <div class="pt-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Pesquisar Aluno ou Mãe</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Pesquisar Registro</label>
                 <input type="text" id="searchBox" placeholder="Carregue o CSV primeiro..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
                 <div id="results" class="mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden"></div>
             </div>
@@ -170,7 +170,7 @@
                 <div id="vDate" class="text-right text-lg mt-12"></div>
                 
                 <div class="mt-24 flex flex-col items-center">
-                    <div id="vSign" class="mb-[-20px] z-10"></div>
+                    <div id="vSign" class="mb-[-15px] z-10"></div>
                     <div class="w-80 border-t border-black"></div>
                     <div class="text-center mt-3">
                         <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
@@ -190,8 +190,9 @@
             <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 5mm;">DECLARAÇÃO</div>
             <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
             <div id="pDate" class="text-right text-[14pt] mt-12"></div>
+            
             <div class="flex flex-col items-center" style="margin-top: 30mm;">
-                <div id="pSign" class="mb-[-20px] z-10"></div>
+                <div id="pSign" class="mb-[-15px] z-10"></div>
                 <div class="w-80 border-t border-black"></div>
                 <div class="text-center mt-3">
                     <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
@@ -199,22 +200,17 @@
                 </div>
             </div>
         </div>
+        
         <div id="pFooter" class="footer-print-area"></div>
     </div>
 
     <script>
         let db = [];
         let selected = null;
-        // Caminhos padrão que o GitHub Pages vai tentar carregar
-        let imgs = { 
-            h: 'cabecalho.png', 
-            s: 'assinatura.png', 
-            f: 'rodape.png' 
-        };
+        let imgs = { h: 'cabecalho.png', s: 'assinatura.png', f: 'rodape.png' };
 
         const $ = (id) => document.getElementById(id);
 
-        // Ao abrir, verifica se as imagens padrão existem no servidor (GitHub)
         window.onload = () => {
             checkAndLoadDefaultImages();
             $('docDate').value = new Date().toISOString().split('T')[0];
@@ -237,14 +233,13 @@
                 img.onerror = () => {
                     $(t.status).innerText = `• ${t.label}: Não encontrado ❌`;
                     $(t.status).classList.add('text-red-400');
-                    imgs[t.key] = ''; // Limpa se falhar
+                    imgs[t.key] = '';
                     render();
                 };
                 img.src = t.path;
             });
         }
 
-        // Processar CSV
         $('csvFile').onchange = (e) => {
             const r = new FileReader();
             r.onload = ev => {
@@ -254,12 +249,11 @@
                     return c.length >= 2 ? { a: c[0].trim(), m: c[1].trim() } : null;
                 }).filter(Boolean);
                 $('searchBox').disabled = false;
-                $('searchBox').placeholder = "Pesquisar aluno ou mãe...";
+                $('searchBox').placeholder = "Pesquisar por nome...";
             };
             r.readAsText(e.target.files[0]);
         };
 
-        // Upload Manual (para substituir as padrão se necessário)
         const bindManualUpload = (id, key, statusId, label) => {
             $(id).onchange = e => {
                 const r = new FileReader();
@@ -276,7 +270,6 @@
         bindManualUpload('signIn', 's', 'status-s', 'Assinatura'); 
         bindManualUpload('footIn', 'f', 'status-f', 'Rodapé');
 
-        // Busca
         $('searchBox').oninput = function() {
             const val = this.value.toLowerCase();
             const resDiv = $('results');
@@ -315,8 +308,8 @@
             ['v', 'p'].forEach(prefix => {
                 $(prefix + 'Body').innerHTML = content;
                 $(prefix + 'Date').innerText = dateLine;
-                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '<div class="img-placeholder h-32">Cabeçalho não encontrado</div>';
-                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '<div class="img-placeholder h-20">Rodapé não encontrado</div>';
+                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '';
+                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '';
                 $(prefix + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
             });
         }
