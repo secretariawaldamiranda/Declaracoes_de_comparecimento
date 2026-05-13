@@ -16,34 +16,36 @@
         /* CONFIGURAÇÕES DE IMPRESSÃO - A4 REAL */
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            
-            body { background: white; margin: 0; padding: 0; }
+            .print-only { display: flex !important; }
             
             @page { 
                 size: A4; 
-                margin: 0; 
+                margin: 0; /* Remove cabeçalhos/rodapés do navegador */
             }
+            
+            body { background: white; margin: 0; padding: 0; }
             
             .print-page { 
                 width: 210mm; 
-                height: 297mm; 
+                height: 296.8mm; /* Ligeiramente menor que 297mm para evitar folha em branco extra */
                 display: flex; 
                 flex-direction: column; 
                 justify-content: space-between; 
                 position: relative; 
                 background: white;
                 box-sizing: border-box;
-                page-break-after: always;
+                overflow: hidden; /* Evita scrolls acidentais que geram novas páginas */
+                page-break-inside: avoid;
+                page-break-after: avoid;
             }
             
             .header-print-area {
-                padding-top: 15mm;
+                padding-top: 10mm; /* Espaço do topo da folha */
                 width: 100%;
             }
 
             .content-print-area {
-                padding: 0 25mm; 
+                padding: 0 25mm; /* Margens laterais padrão */
                 flex-grow: 1; 
                 display: flex;
                 flex-direction: column;
@@ -51,7 +53,7 @@
 
             .footer-print-area {
                 width: 100%;
-                padding-bottom: 10mm; 
+                padding-bottom: 10mm; /* Espaço da base da folha */
             }
         }
 
@@ -76,7 +78,7 @@
             justify-content: space-between;
             font-family: 'Times New Roman', Times, serif;
             position: relative;
-            flex-shrink: 0; /* Impede que a div encolha em telemóveis */
+            flex-shrink: 0;
         }
 
         .img-full { 
@@ -92,7 +94,6 @@
             margin: 0 auto; 
         }
 
-        /* Esconder scrollbar mas manter funcionalidade */
         .a4-container::-webkit-scrollbar {
             height: 6px;
         }
@@ -112,7 +113,6 @@
         </header>
         
         <div class="space-y-6 lg:space-y-8">
-            
             <!-- 1. Configurações -->
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Dados do Documento</h3>
@@ -184,7 +184,7 @@
                 <div id="vHeader"></div>
                 
                 <div class="p-[15mm_25mm] flex-grow">
-                    <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
+                    <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
                     <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                     <div id="vDate" class="text-right text-lg mt-12"></div>
                     
@@ -214,11 +214,11 @@
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
-            <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
-            <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
-            <div id="pDate" class="text-right text-[14pt] mt-12"></div>
+            <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
+            <div id="pBody" class="text-[14pt] leading-[2] text-justify"></div>
+            <div id="pDate" class="text-right text-[14pt] mt-16"></div>
             
-            <div class="flex flex-col items-center" style="margin-top: 40mm;">
+            <div class="flex flex-col items-center" style="margin-top: auto; margin-bottom: 30mm;">
                 <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                 <div class="w-80 border-t border-black relative z-10"></div>
                 <div class="text-center mt-3">
@@ -239,13 +239,11 @@
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
-            // Data Local
             const agora = new Date();
             const offset = agora.getTimezoneOffset();
             const dataLocal = new Date(agora.getTime() - (offset*60*1000)).toISOString().split('T')[0];
             $('docDate').value = dataLocal;
 
-            // Turno Automático
             const hora = agora.getHours();
             let turno = "noturno";
             if (hora >= 5 && hora < 12) turno = "matutino";
@@ -346,7 +344,6 @@
             $('manualName').classList.toggle('hidden', v !== 'manual');
             if(v === 'manual') {
                 $('manualName').focus();
-                // Scroll para o campo manual se necessário no telemóvel
                 $('manualName').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             render();
