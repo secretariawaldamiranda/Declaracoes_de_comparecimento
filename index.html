@@ -82,79 +82,59 @@
             display: block; 
             margin: 0 auto; 
         }
-
-        .img-placeholder {
-            border: 1px dashed #cbd5e1;
-            background: #f8fafc;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Menu de Controle Lateral -->
-    <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
-        <header class="mb-8">
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Sistema 100% Automatizado ✨</p>
+    <!-- Menu de Controle Lateral (Simplificado) -->
+    <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Emissor de Declarações</p>
         </header>
         
-        <div class="space-y-6">
-            <!-- Status da Base de Dados -->
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">1. Base de Dados (CUBO.CSV)</label>
-                <div id="status-csv" class="text-[11px] font-medium mb-3 text-slate-400">Procurando arquivo...</div>
-                <input type="file" id="csvFile" accept=".csv" class="w-full text-xs">
-            </div>
+        <div class="space-y-8">
             
-            <!-- Status das Imagens -->
-            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                <label class="block text-[10px] font-bold text-blue-500 uppercase mb-1">2. Ficheiros de Imagem</label>
-                <div class="text-[10px] space-y-1 text-blue-700 font-medium">
-                    <p id="status-h">• Cabeçalho: Verificando...</p>
-                    <p id="status-f">• Rodapé: Verificando...</p>
-                    <p id="status-s">• Assinatura: Verificando...</p>
-                </div>
-                <hr class="border-blue-200">
-                <p class="text-[9px] text-blue-400 italic">Trocar imagens:</p>
-                <input type="file" id="headIn" class="w-full text-[10px]">
-                <input type="file" id="footIn" class="w-full text-[10px]">
-                <input type="file" id="signIn" class="w-full text-[10px]">
-            </div>
-
             <!-- Configurações de Data e Turno -->
-            <div class="grid grid-cols-2 gap-2">
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Data</label>
-                    <input type="date" id="docDate" class="text-xs border rounded p-2 outline-none">
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Turno</label>
-                    <select id="docShift" class="text-xs border rounded p-2 outline-none">
-                        <option value="matutino">Matutino</option>
-                        <option value="vespertino" selected>Vespertino</option>
-                        <option value="noturno">Noturno</option>
-                    </select>
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Configurações</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data de Comparecimento</label>
+                        <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno</label>
+                        <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
+                            <option value="matutino">Matutino</option>
+                            <option value="vespertino" selected>Vespertino</option>
+                            <option value="noturno">Noturno</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <!-- Busca Principal -->
-            <div class="pt-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Selecionar Aluno</label>
-                <input type="text" id="searchBox" placeholder="Aguardando base de dados..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
-                <div id="results" class="mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden"></div>
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
+                <div class="relative">
+                    <input type="text" id="searchBox" placeholder="Digite nome do Aluno ou Mãe..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
+                    <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
+                </div>
             </div>
 
-            <!-- Botão de Impressão -->
-            <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                IMPRIMIR AGORA
-            </button>
+            <div class="pt-6 border-t border-slate-100">
+                <!-- Botão de Impressão -->
+                <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    IMPRIMIR
+                </button>
+            </div>
+            
+            <!-- Status Discreto (Apenas para controle interno) -->
+            <div class="pt-4 opacity-0 group hover:opacity-100 transition-opacity text-[9px] text-slate-400 text-center">
+                <p id="status-debug">Automação ativa</p>
+            </div>
         </div>
     </div>
 
@@ -180,9 +160,17 @@
 
             <div id="vFooter"></div>
         </div>
+
+        <!-- Mensagem quando nada está selecionado -->
+        <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-32">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+            </svg>
+            <p class="text-xl font-medium opacity-50">Pesquise um nome para gerar o documento</p>
+        </div>
     </div>
 
-    <!-- Área de Impressão -->
+    <!-- ÁREA DE IMPRESSÃO -->
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
@@ -212,30 +200,22 @@
 
         window.onload = () => {
             checkAndLoadDefaultImages();
-            checkAndLoadDefaultCSV(); // Nova função para carregar o CSV
+            checkAndLoadDefaultCSV();
             $('docDate').value = new Date().toISOString().split('T')[0];
         };
 
-        // Função para carregar o CSV automaticamente
         function checkAndLoadDefaultCSV() {
             fetch('CUBO.CSV')
                 .then(response => {
                     if (!response.ok) throw new Error();
                     return response.text();
                 })
-                .then(text => {
-                    parseCSV(text);
-                    $('status-csv').innerText = "Base de dados carregada ✅";
-                    $('status-csv').classList.remove('text-slate-400');
-                    $('status-csv').classList.add('text-green-600');
-                })
+                .then(text => parseCSV(text))
                 .catch(() => {
-                    $('status-csv').innerText = "Base automática não encontrada ❌";
-                    $('status-csv').classList.add('text-red-400');
+                    console.error("Base automática não encontrada.");
                 });
         }
 
-        // Centraliza a lógica de leitura do CSV
         function parseCSV(text) {
             const lines = text.split('\n');
             db = lines.slice(1).map(l => {
@@ -251,54 +231,21 @@
 
         function checkAndLoadDefaultImages() {
             const targets = [
-                { key: 'h', path: 'cabecalho.png', status: 'status-h', label: 'Cabeçalho' },
-                { key: 'f', path: 'rodape.png', status: 'status-f', label: 'Rodapé' },
-                { key: 's', path: 'assinatura.png', status: 'status-s', label: 'Assinatura' }
+                { key: 'h', path: 'cabecalho.png' },
+                { key: 'f', path: 'rodape.png' },
+                { key: 's', path: 'assinatura.png' }
             ];
 
             targets.forEach(t => {
                 const img = new Image();
-                img.onload = () => {
-                    $(t.status).innerText = `• ${t.label}: Carregado ✅`;
-                    $(t.status).classList.add('text-green-600');
-                    render();
-                };
+                img.onload = () => render();
                 img.onerror = () => {
-                    $(t.status).innerText = `• ${t.label}: Não encontrado ❌`;
-                    $(t.status).classList.add('text-red-400');
                     imgs[t.key] = '';
                     render();
                 };
                 img.src = t.path;
             });
         }
-
-        // Manual CSV Upload
-        $('csvFile').onchange = (e) => {
-            const r = new FileReader();
-            r.onload = ev => {
-                parseCSV(ev.target.result);
-                $('status-csv').innerText = "Base manual carregada ✅";
-                $('status-csv').classList.add('text-blue-600');
-            };
-            r.readAsText(e.target.files[0]);
-        };
-
-        const bindManualUpload = (id, key, statusId, label) => {
-            $(id).onchange = e => {
-                const r = new FileReader();
-                r.onload = ev => { 
-                    imgs[key] = ev.target.result;
-                    $(statusId).innerText = `• ${label}: Manual ✅`;
-                    render(); 
-                };
-                r.readAsDataURL(e.target.files[0]);
-            };
-        };
-
-        bindManualUpload('headIn', 'h', 'status-h', 'Cabeçalho'); 
-        bindManualUpload('signIn', 's', 'status-s', 'Assinatura'); 
-        bindManualUpload('footIn', 'f', 'status-f', 'Rodapé');
 
         $('searchBox').oninput = function() {
             const val = this.value.toLowerCase();
@@ -309,13 +256,14 @@
             resDiv.classList.toggle('hidden', matches.length === 0);
             matches.forEach(item => {
                 const d = document.createElement('div');
-                d.className = "p-3 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm";
-                d.innerHTML = `<b>${item.a}</b><br><small>Mãe: ${item.m}</small>`;
+                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
+                d.innerHTML = `<div><b class="text-slate-800">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
                 d.onclick = () => {
                     selected = item;
                     resDiv.classList.add('hidden');
                     $('searchBox').value = item.a;
                     $('canvas').classList.remove('hidden');
+                    $('empty-state').classList.add('hidden');
                     render();
                 };
                 resDiv.appendChild(d);
