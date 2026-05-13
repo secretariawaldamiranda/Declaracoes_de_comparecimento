@@ -86,25 +86,25 @@
 </head>
 <body>
 
-    <!-- Menu Lateral Simplificado -->
+    <!-- Interface Lateral Minimalista -->
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
         <header class="mb-10 text-center">
             <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Identificação de Turno Ativa ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Automação Inteligente ✨</p>
         </header>
         
         <div class="space-y-8">
             
-            <!-- Configurações Automáticas -->
+            <!-- Configurações (Data e Turno automáticos) -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Configurações</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Documento</h3>
                 <div class="grid grid-cols-1 gap-4">
                     <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data (Hoje)</label>
                         <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
                     </div>
                     <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno (Auto-detectado)</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno (Atual)</label>
                         <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 font-medium">
                             <option value="matutino">Matutino</option>
                             <option value="vespertino">Vespertino</option>
@@ -114,11 +114,11 @@
                 </div>
             </div>
 
-            <!-- Busca Principal -->
+            <!-- Pesquisa -->
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Aluno</h3>
                 <div class="relative">
-                    <input type="text" id="searchBox" placeholder="Aguardando base..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
+                    <input type="text" id="searchBox" placeholder="Pesquisar registro..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
                     <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
                 </div>
             </div>
@@ -129,10 +129,15 @@
                     IMPRIMIR
                 </button>
             </div>
+            
+            <!-- Créditos Discretos -->
+            <div class="pt-10 text-[9px] text-slate-300 text-center uppercase tracking-widest">
+                Gerador de Comparecimento v5.0
+            </div>
         </div>
     </div>
 
-    <!-- Preview Navegador -->
+    <!-- Visualização do Documento -->
     <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
         <div id="canvas" class="a4-preview hidden">
             <div id="vHeader"></div>
@@ -142,6 +147,7 @@
                 <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                 <div id="vDate" class="text-right text-lg mt-12"></div>
                 
+                <!-- Área de Assinatura (Configurada para ficar por trás da linha) -->
                 <div class="mt-32 flex flex-col items-center">
                     <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                     <div class="w-80 border-t border-black relative z-10"></div>
@@ -155,15 +161,16 @@
             <div id="vFooter"></div>
         </div>
 
+        <!-- Estado Vazio -->
         <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-32">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
             </svg>
-            <p class="text-xl font-medium opacity-50">Pesquise um nome para gerar o documento</p>
+            <p class="text-xl font-medium opacity-40 italic">Inicie a pesquisa para gerar o documento</p>
         </div>
     </div>
 
-    <!-- Área de Impressão -->
+    <!-- ÁREA DE IMPRESSÃO REAL -->
     <div class="print-only print-page">
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
@@ -192,25 +199,24 @@
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
-            detectCurrentShift(); // Detectar turno antes de carregar o resto
+            // 1. Detectar Data e Turno imediatamente
+            const agora = new Date();
+            
+            // Ajuste para formato YYYY-MM-DD local
+            const offset = agora.getTimezoneOffset();
+            const dataLocal = new Date(agora.getTime() - (offset*60*1000)).toISOString().split('T')[0];
+            $('docDate').value = dataLocal;
+
+            const hora = agora.getHours();
+            let turno = "noturno";
+            if (hora >= 5 && hora < 12) turno = "matutino";
+            else if (hora >= 12 && hora < 18) turno = "vespertino";
+            $('docShift').value = turno;
+
+            // 2. Carregar recursos automáticos
             checkAndLoadDefaultImages();
             checkAndLoadDefaultCSV();
-            $('docDate').value = new Date().toISOString().split('T')[0];
         };
-
-        // Função para detectar o turno atual
-        function detectCurrentShift() {
-            const hour = new Date().getHours();
-            let shift = "noturno"; // Padrão caso seja madrugada
-
-            if (hour >= 5 && hour < 12) {
-                shift = "matutino";
-            } else if (hour >= 12 && hour < 18) {
-                shift = "vespertino";
-            }
-
-            $('docShift').value = shift;
-        }
 
         function checkAndLoadDefaultCSV() {
             fetch('CUBO.CSV')
@@ -228,7 +234,7 @@
             
             if (db.length > 0) {
                 $('searchBox').disabled = false;
-                $('searchBox').placeholder = `Pesquisar em ${db.length} nomes...`;
+                $('searchBox').placeholder = `Pesquisar em ${db.length} registros...`;
             }
         }
 
@@ -252,7 +258,7 @@
             matches.forEach(item => {
                 const d = document.createElement('div');
                 d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
-                d.innerHTML = `<div><b class="text-slate-800">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
+                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
                 d.onclick = () => {
                     selected = item;
                     resDiv.classList.add('hidden');
@@ -267,20 +273,20 @@
 
         function render() {
             if (!selected) return;
-            const dateVal = $('docDate').value || new Date().toISOString().split('T')[0];
+            const dateVal = $('docDate').value;
             const shift = $('docShift').value;
-            const months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
             const [y, m, d] = dateVal.split('-');
-            const fullDateStr = `${d} de ${months[parseInt(m)-1]} de ${y}`;
+            const dataExtenso = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
             
-            const content = `Declaro para os devidos fins legais que, <strong>${selected.m}</strong>, compareceu nesta Unidade Escolar no dia <strong>${fullDateStr}</strong>, no turno <strong>${shift}</strong>, para resolver assuntos relacionados a <strong>${selected.a}</strong>.
+            const conteudo = `Declaro para os devidos fins legais que, <strong>${selected.m}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExtenso}</strong>, no turno <strong>${shift}</strong>, para resolver assuntos relacionados a <strong>${selected.a}</strong>.
             <p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
             
-            const dateLine = `Formosa-GO, ${fullDateStr}.`;
+            const linhaData = `Formosa-GO, ${dataExtenso}.`;
 
             ['v', 'p'].forEach(prefix => {
-                $(prefix + 'Body').innerHTML = content;
-                $(prefix + 'Date').innerText = dateLine;
+                $(prefix + 'Body').innerHTML = conteudo;
+                $(prefix + 'Date').innerText = linhaData;
                 $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '';
                 $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '';
                 $(prefix + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
