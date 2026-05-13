@@ -16,7 +16,7 @@
         /* CONFIGURAÇÕES DE IMPRESSÃO - A4 REAL */
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: flex !important; }
+            .print-only { display: block !important; }
             
             body { background: white; margin: 0; padding: 0; }
             
@@ -57,17 +57,26 @@
 
         .print-only { display: none; }
         
+        /* Ajuste do Canvas para ser responsivo no ecrã */
+        .a4-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
         .a4-preview { 
             width: 210mm; 
             min-height: 297mm; 
             background: white; 
-            margin: 2rem auto; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
             display: flex; 
             flex-direction: column; 
             justify-content: space-between;
             font-family: 'Times New Roman', Times, serif;
             position: relative;
+            flex-shrink: 0; /* Impede que a div encolha em telemóveis */
         }
 
         .img-full { 
@@ -82,23 +91,32 @@
             display: block; 
             margin: 0 auto; 
         }
+
+        /* Esconder scrollbar mas manter funcionalidade */
+        .a4-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .a4-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     </style>
 </head>
-<body>
+<body class="flex flex-col lg:flex-row">
 
-    <!-- Menu Lateral Simplificado -->
-    <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
-        <header class="mb-10 text-center">
-            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Versão Corrigida ✨</p>
+    <!-- Menu Lateral / Topo Responsivo -->
+    <div class="no-print w-full lg:w-80 lg:fixed lg:h-full bg-white border-b lg:border-b-0 lg:border-r border-slate-200 shadow-xl p-6 lg:p-8 z-50 overflow-y-auto">
+        <header class="mb-6 lg:mb-10 text-center">
+            <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Versão Mobile Friendly ✨</p>
         </header>
         
-        <div class="space-y-8">
+        <div class="space-y-6 lg:space-y-8">
             
             <!-- 1. Configurações -->
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Dados do Documento</h3>
-                <div class="grid grid-cols-1 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                     <div class="flex flex-col">
                         <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
                         <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
@@ -115,33 +133,33 @@
             </div>
 
             <!-- 2. Pesquisa -->
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
                 <div class="relative">
                     <input type="text" id="searchBox" placeholder="A carregar CUBO.CSV..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
-                    <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
+                    <div id="results" class="absolute z-[60] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-60 lg:max-h-72 overflow-y-auto hidden"></div>
                 </div>
             </div>
 
-            <!-- 3. Responsável (Dinamico) -->
+            <!-- 3. Responsável -->
             <div id="selectorArea" class="hidden space-y-4 animate-in slide-in-from-top duration-300">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Declarante</h3>
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-3">
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="mae" checked onchange="handleRespChange()">
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="respType" value="mae" checked onchange="handleRespChange()" class="w-4 h-4">
                             <span class="text-slate-700">Mãe: <span id="optMae" class="font-bold"></span></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="pai" onchange="handleRespChange()">
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="respType" value="pai" onchange="handleRespChange()" class="w-4 h-4">
                             <span class="text-slate-700">Pai: <span id="optPai" class="font-bold"></span></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="outro" onchange="handleRespChange()">
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="respType" value="outro" onchange="handleRespChange()" class="w-4 h-4">
                             <span class="text-slate-700">Responsável: <span id="optResp" class="font-bold"></span></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="manual" onchange="handleRespChange()">
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="respType" value="manual" onchange="handleRespChange()" class="w-4 h-4">
                             <span class="font-medium text-blue-600 italic">Outro (Digitar nome...)</span>
                         </label>
                     </div>
@@ -159,34 +177,36 @@
         </div>
     </div>
 
-    <!-- Visualização no Navegador -->
-    <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
-        <div id="canvas" class="a4-preview hidden">
-            <div id="vHeader"></div>
-            
-            <div class="p-[15mm_25mm] flex-grow">
-                <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
-                <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
-                <div id="vDate" class="text-right text-lg mt-12"></div>
+    <!-- Área Principal de Visualização -->
+    <div class="flex-1 lg:ml-80 min-h-screen">
+        <div class="a4-container no-print">
+            <div id="canvas" class="a4-preview hidden">
+                <div id="vHeader"></div>
                 
-                <div class="mt-32 flex flex-col items-center">
-                    <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
-                    <div class="w-80 border-t border-black relative z-10"></div>
-                    <div class="text-center mt-3">
-                        <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
-                        <p class="text-slate-500">Diretora</p>
+                <div class="p-[15mm_25mm] flex-grow">
+                    <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
+                    <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
+                    <div id="vDate" class="text-right text-lg mt-12"></div>
+                    
+                    <div class="mt-32 flex flex-col items-center">
+                        <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
+                        <div class="w-80 border-t border-black relative z-10"></div>
+                        <div class="text-center mt-3">
+                            <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
+                            <p class="text-slate-500">Diretora</p>
+                        </div>
                     </div>
                 </div>
+
+                <div id="vFooter" class="mt-auto"></div>
             </div>
 
-            <div id="vFooter" class="mt-auto"></div>
-        </div>
-
-        <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-40">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-            </svg>
-            <p class="text-lg opacity-40 italic">Pesquise o nome do aluno para começar</p>
+            <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-20 lg:mt-40 px-4 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 lg:h-24 w-16 lg:w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+                <p class="text-base lg:text-lg opacity-40 italic">Inicie a pesquisa para gerar o documento.<br class="hidden lg:block"> Deslize para os lados se estiver no telemóvel para ver a folha inteira.</p>
+            </div>
         </div>
     </div>
 
@@ -245,9 +265,7 @@
                 .then(text => parseCSV(text))
                 .catch(err => {
                     console.error(err);
-                    $('searchBox').placeholder = "CUBO.CSV não encontrado no GitHub.";
-                    // Em caso de erro, permitir carregar manualmente se o input existisse, 
-                    // mas como ocultamos, apenas mostramos a mensagem de erro.
+                    $('searchBox').placeholder = "Erro: CUBO.CSV não encontrado.";
                 });
         }
 
@@ -255,7 +273,6 @@
             const lines = text.split('\n').filter(line => line.trim() !== "");
             if (lines.length < 1) return;
 
-            // Identificação dinâmica das colunas pelo cabeçalho
             const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
             
             const idx = {
@@ -279,7 +296,7 @@
                 $('searchBox').disabled = false;
                 $('searchBox').placeholder = `Pesquisar em ${db.length} nomes...`;
             } else {
-                $('searchBox').placeholder = "CSV está vazio ou inválido.";
+                $('searchBox').placeholder = "CSV inválido.";
             }
         }
 
@@ -327,7 +344,11 @@
         function handleRespChange() {
             const v = document.querySelector('input[name="respType"]:checked').value;
             $('manualName').classList.toggle('hidden', v !== 'manual');
-            if(v === 'manual') $('manualName').focus();
+            if(v === 'manual') {
+                $('manualName').focus();
+                // Scroll para o campo manual se necessário no telemóvel
+                $('manualName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             render();
         }
 
@@ -355,8 +376,8 @@
             ['v', 'p'].forEach(prefix => {
                 $(prefix + 'Body').innerHTML = body;
                 $(prefix + 'Date').innerText = city;
-                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '';
-                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '';
+                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-fluid">` : '';
+                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-fluid">` : '';
                 $(prefix + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
             });
         }
