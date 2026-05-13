@@ -7,222 +7,85 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9; 
-        }
-
-        /* CONFIGURAÇÕES DE IMPRESSÃO - A4 REAL */
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: flex !important; }
-            
             body { background: white; margin: 0; padding: 0; }
-            
-            @page { 
-                size: A4; 
-                margin: 0; 
-            }
-            
-            .print-page { 
-                width: 210mm; 
-                height: 297mm; 
-                display: flex; 
-                flex-direction: column; 
-                justify-content: space-between; 
-                position: relative; 
-                background: white;
-                box-sizing: border-box;
-                page-break-after: always;
-            }
-            
-            .header-print-area {
-                padding-top: 15mm;
-                width: 100%;
-            }
-
-            .content-print-area {
-                padding: 0 25mm; 
-                flex-grow: 1; 
-                display: flex;
-                flex-direction: column;
-            }
-
-            .footer-print-area {
-                width: 100%;
-                padding-bottom: 10mm; 
-            }
+            @page { size: A4; margin: 0; }
+            .print-page { width: 210mm; height: 297mm; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: white; box-sizing: border-box; page-break-after: always; }
+            .header-print-area { padding-top: 15mm; width: 100%; }
+            .content-print-area { padding: 0 25mm; flex-grow: 1; display: flex; flex-direction: column; }
+            .footer-print-area { width: 100%; padding-bottom: 10mm; }
         }
-
         .print-only { display: none; }
-        
-        .a4-preview { 
-            width: 210mm; 
-            min-height: 297mm; 
-            background: white; 
-            margin: 2rem auto; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            font-family: 'Times New Roman', Times, serif;
-            position: relative;
-        }
-
-        .img-full { 
-            width: 100%; 
-            height: auto; 
-            display: block; 
-        }
-
-        .signature-img { 
-            max-height: 45px; 
-            width: auto; 
-            display: block; 
-            margin: 0 auto; 
-        }
+        .a4-preview { width: 210mm; min-height: 297mm; background: white; margin: 2rem auto; box-shadow: 0 20px 50px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; font-family: 'Times New Roman', Times, serif; position: relative; }
+        .img-full { width: 100%; height: auto; display: block; }
+        .signature-img { max-height: 45px; width: auto; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
 
-    <!-- Menu Lateral -->
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
         <header class="mb-10 text-center">
             <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Sistema Automatizado</p>
         </header>
         
         <div class="space-y-6">
-            <!-- 1. Configurações -->
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Dados do Dia</h3>
-                <div class="grid grid-cols-1 gap-3">
-                    <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
-                    <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium">
-                        <option value="matutino">Matutino</option>
-                        <option value="vespertino">Vespertino</option>
-                        <option value="noturno">Noturno</option>
-                    </select>
-                </div>
+                <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50">
+                <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50">
+                    <option value="matutino">Matutino</option>
+                    <option value="vespertino">Vespertino</option>
+                    <option value="noturno">Noturno</option>
+                </select>
             </div>
 
-            <!-- 2. Busca -->
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Aluno</h3>
-                <div class="relative">
-                    <input type="text" id="searchBox" placeholder="A carregar CUBO.CSV..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
-                    <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
-                </div>
+                <input type="text" id="searchBox" placeholder="Carregando..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none" disabled>
+                <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
             </div>
 
-            <!-- 3. Responsável -->
-            <div id="selectorArea" class="hidden space-y-4 animate-in slide-in-from-top duration-300">
+            <div id="selectorArea" class="hidden space-y-4">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Declarante</h3>
-                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-3">
-                    <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="mae" checked onchange="handleRespChange()">
-                            <span class="text-slate-700">Mãe: <span id="optMae" class="font-bold"></span></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="pai" onchange="handleRespChange()">
-                            <span class="text-slate-700">Pai: <span id="optPai" class="font-bold"></span></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="outro" onchange="handleRespChange()">
-                            <span class="text-slate-700">Responsável: <span id="optResp" class="font-bold"></span></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="manual" onchange="handleRespChange()">
-                            <span class="font-medium text-blue-600 italic">Outro (Digitar nome...)</span>
-                        </label>
-                    </div>
-                    
-                    <input type="text" id="manualName" placeholder="Digite o nome completo" class="hidden w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" oninput="render()">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-2 text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="respType" value="mae" checked onchange="handleRespChange()"> Mãe: <span id="optMae" class="font-bold"></span></label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="respType" value="pai" onchange="handleRespChange()"> Pai: <span id="optPai" class="font-bold"></span></label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="respType" value="outro" onchange="handleRespChange()"> Resp: <span id="optResp" class="font-bold"></span></label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="respType" value="manual" onchange="handleRespChange()"> <span class="text-blue-600 italic">Outro (Digitar...)</span></label>
+                    <input type="text" id="manualName" placeholder="Nome completo" class="hidden w-full p-2 border rounded-xl text-sm" oninput="render()">
                 </div>
             </div>
 
-            <div class="pt-4">
-                <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                    IMPRIMIR
-                </button>
-            </div>
+            <button onclick="window.print()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl">IMPRIMIR</button>
         </div>
     </div>
 
-    <!-- Preview -->
     <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
         <div id="canvas" class="a4-preview hidden">
             <div id="vHeader"></div>
-            
             <div class="p-[15mm_25mm] flex-grow">
-                <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
+                <div class="text-center font-bold text-2xl mb-12 underline uppercase">DECLARAÇÃO</div>
                 <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                 <div id="vDate" class="text-right text-lg mt-12"></div>
-                
                 <div class="mt-32 flex flex-col items-center">
-                    <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
-                    <div class="w-80 border-t border-black relative z-10"></div>
-                    <div class="text-center mt-3">
-                        <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
-                        <p class="text-slate-500">Diretora</p>
-                    </div>
+                    <div id="vSign" class="h-[45px]"></div>
+                    <div class="w-80 border-t border-black text-center mt-3 font-bold uppercase">Elaine Lopes da Luz Almeida</div>
                 </div>
             </div>
-
-            <div id="vFooter" class="mt-auto"></div>
+            <div id="vFooter"></div>
         </div>
-
-        <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-40">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-            </svg>
-            <p class="text-lg opacity-40">Pesquise o aluno para começar</p>
-        </div>
-    </div>
-
-    <!-- Impressão Real -->
-    <div class="print-only print-page">
-        <div id="pHeader" class="header-print-area"></div>
-        <div class="content-print-area">
-            <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
-            <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
-            <div id="pDate" class="text-right text-[14pt] mt-12"></div>
-            
-            <div class="flex flex-col items-center" style="margin-top: 40mm;">
-                <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
-                <div class="w-80 border-t border-black relative z-10"></div>
-                <div class="text-center mt-3">
-                    <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
-                    <p class="text-[12pt]">Diretora</p>
-                </div>
-            </div>
-        </div>
-        <div id="pFooter" class="footer-print-area"></div>
     </div>
 
     <script>
         let db = [];
         let selected = null;
-        let imgs = { h: 'cabecalho.png', s: 'assinatura.png', f: 'rodape.png' };
-
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
-            // Data e Turno Auto
-            const agora = new Date();
-            const dataLocal = new Date(agora.getTime() - (agora.getTimezoneOffset()*60*1000)).toISOString().split('T')[0];
-            $('docDate').value = dataLocal;
-
-            const hora = agora.getHours();
-            let turno = "noturno";
-            if (hora >= 5 && hora < 12) turno = "matutino";
-            else if (hora >= 12 && hora < 18) turno = "vespertino";
-            $('docShift').value = turno;
-
-            loadAssets();
+            $('docDate').value = new Date().toISOString().split('T')[0];
             loadCSV();
         };
 
@@ -230,124 +93,56 @@
             fetch('CUBO.CSV')
                 .then(r => r.text())
                 .then(text => {
-                    const lines = text.split('\n').filter(line => line.trim() !== "");
-                    if (lines.length < 1) return;
-
-                    const header = lines[0].toLowerCase();
-                    // Verifica se é o formato novo (4 colunas) ou antigo (2 colunas)
-                    const isNewFormat = header.includes('pai') || header.includes('responsável');
-
+                    const lines = text.split('\n').filter(l => l.trim() !== "");
                     db = lines.slice(1).map(l => {
                         const c = l.split(';');
-                        if (isNewFormat) {
-                            // Ordem no ficheiro novo: Aluno(0); Pai(1); Mãe(2); Responsável(3)
-                            return {
-                                a: c[0]?.trim() || "",
-                                p: c[1]?.trim() || "",
-                                m: c[2]?.trim() || "",
-                                r: c[3]?.trim() || ""
-                            };
-                        } else {
-                            // Ordem no ficheiro antigo: Aluno(0); Mãe(1)
-                            return {
-                                a: c[0]?.trim() || "",
-                                p: "",
-                                m: c[1]?.trim() || "",
-                                r: ""
-                            };
-                        }
-                    }).filter(item => item.a !== "");
-                    
+                        return { a: c[0]?.trim() || "", m: c[1]?.trim() || "", p: c[2]?.trim() || "", r: c[3]?.trim() || "" };
+                    }).filter(i => i.a !== "");
                     if (db.length > 0) {
                         $('searchBox').disabled = false;
-                        $('searchBox').placeholder = `Pesquisar em ${db.length} registros...`;
+                        $('searchBox').placeholder = `Pesquisar em ${db.length} alunos...`;
                     }
-                })
-                .catch(() => {
-                    $('searchBox').placeholder = "CUBO.CSV não encontrado.";
                 });
-        }
-
-        function loadAssets() {
-            const targets = [{k:'h',p:'cabecalho.png'},{k:'f',p:'rodape.png'},{k:'s',p:'assinatura.png'}];
-            targets.forEach(t => {
-                const i = new Image();
-                i.onload = () => render();
-                i.onerror = () => { imgs[t.k] = ''; render(); };
-                i.src = t.p;
-            });
         }
 
         $('searchBox').oninput = function() {
             const val = this.value.toLowerCase();
             const res = $('results');
             if (val.length < 2) return res.classList.add('hidden');
-            const m = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)).slice(0, 5);
+            
+            const m = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val) || i.p.toLowerCase().includes(val) || i.r.toLowerCase().includes(val)).slice(0, 5);
             res.innerHTML = '';
             res.classList.toggle('hidden', m.length === 0);
+            
             m.forEach(item => {
                 const d = document.createElement('div');
-                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
-                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
+                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b text-sm";
+                d.innerHTML = `<b>${item.a}</b><div class="text-[10px] text-slate-400">Mãe: ${item.m} | Pai: ${item.p} | Resp: ${item.r}</div>`;
                 d.onclick = () => {
                     selected = item;
                     $('searchBox').value = item.a;
                     res.classList.add('hidden');
                     $('canvas').classList.remove('hidden');
-                    $('empty-state').classList.add('hidden');
                     $('selectorArea').classList.remove('hidden');
-                    
-                    $('optMae').innerText = item.m || "(Vazio)";
-                    $('optPai').innerText = item.p || "(Vazio)";
-                    $('optResp').innerText = item.r || "(Vazio)";
-                    
-                    document.querySelector('input[value="mae"]').checked = true;
-                    $('manualName').classList.add('hidden');
+                    $('optMae').innerText = item.m || "---";
+                    $('optPai').innerText = item.p || "---";
+                    $('optResp').innerText = item.r || "---";
                     render();
                 };
                 res.appendChild(d);
             });
         };
 
-        function handleRespChange() {
-            const v = document.querySelector('input[name="respType"]:checked').value;
-            $('manualName').classList.toggle('hidden', v !== 'manual');
-            if(v === 'manual') $('manualName').focus();
-            render();
-        }
+        function handleRespChange() { render(); }
 
         function render() {
             if (!selected) return;
-            const dv = $('docDate').value;
-            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-            const [y, m, d] = dv.split('-');
-            const dataExt = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
-            const turno = $('docShift').value;
-
             const type = document.querySelector('input[name="respType"]:checked').value;
-            let declName = "";
-            if (type === 'mae') declName = selected.m;
-            else if (type === 'pai') declName = selected.p;
-            else if (type === 'outro') declName = selected.r;
-            else declName = $('manualName').value;
-
-            if(!declName || declName === "") declName = "____________________";
-
-            const body = `Declaro para os devidos fins legais que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExt}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
+            let declName = type === 'mae' ? selected.m : type === 'pai' ? selected.p : type === 'outro' ? selected.r : $('manualName').value;
             
-            const city = `Formosa-GO, ${dataExt}.`;
-
-            ['v', 'p'].forEach(x => {
-                $(x + 'Body').innerHTML = body;
-                $(x + 'Date').innerText = city;
-                $(x + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-full">` : '';
-                $(x + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-full">` : '';
-                $(x + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
-            });
+            const body = `Declaro que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${$('docDate').value}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.`;
+            $('vBody').innerHTML = body;
         }
-
-        $('docDate').onchange = () => render();
-        $('docShift').onchange = () => render();
     </script>
 </body>
 </html>
