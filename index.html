@@ -30,29 +30,28 @@
                 height: 297mm; 
                 display: flex; 
                 flex-direction: column; 
-                justify-content: space-between; /* Empurra o rodapé para o fim */
+                justify-content: space-between; 
                 position: relative; 
                 background: white;
                 box-sizing: border-box;
                 page-break-after: always;
             }
             
-            /* Espaçador do topo para evitar corte da impressora */
             .header-print-area {
                 padding-top: 10mm;
                 width: 100%;
             }
 
             .content-print-area {
-                padding: 0 25mm; /* Margens laterais do texto */
-                flex-grow: 1; /* Faz este bloco ocupar o espaço do meio */
+                padding: 0 25mm; 
+                flex-grow: 1; 
                 display: flex;
                 flex-direction: column;
             }
 
             .footer-print-area {
                 width: 100%;
-                padding-bottom: 10mm; /* Espaço do fim da folha */
+                padding-bottom: 10mm; 
             }
         }
 
@@ -92,7 +91,7 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Gerador de Documentos</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Memória Ativa Ativada ✨</p>
         </header>
         
         <div class="space-y-6">
@@ -104,7 +103,10 @@
             
             <!-- 2. Carregar Imagens -->
             <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
-                <label class="block text-[10px] font-bold text-blue-500 uppercase mb-1">2. Papel Timbrado & Assinatura</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[10px] font-bold text-blue-500 uppercase">2. Papel Timbrado & Assinatura</label>
+                    <button onclick="clearStoredImages()" class="text-[9px] text-red-500 font-bold hover:underline">Limpar Salvas</button>
+                </div>
                 <div>
                     <span class="text-[9px] text-blue-400 font-bold block uppercase">Cabeçalho</span>
                     <input type="file" id="headIn" class="w-full text-[10px]">
@@ -117,6 +119,7 @@
                     <span class="text-[9px] text-blue-400 font-bold block uppercase">Assinatura Digital</span>
                     <input type="file" id="signIn" class="w-full text-[10px]">
                 </div>
+                <p class="text-[9px] text-blue-400 italic">* As imagens ficam salvas neste navegador.</p>
             </div>
 
             <!-- 3. Configurações -->
@@ -138,14 +141,14 @@
             <!-- 4. Busca -->
             <div class="pt-2">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">3. Selecionar Registro</label>
-                <input type="text" id="searchBox" placeholder="Pesquisar..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
+                <input type="text" id="searchBox" placeholder="Pesquisar aluno ou mãe..." class="w-full border-2 border-slate-100 rounded-xl p-3 text-sm focus:border-blue-500 outline-none transition-all disabled:opacity-50" disabled>
                 <div id="results" class="mt-2 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden"></div>
             </div>
 
             <!-- Botão Imprimir -->
             <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                IMPRIMIR AGORA
+                IMPRIMIR DOCUMENTO
             </button>
         </div>
     </div>
@@ -174,12 +177,10 @@
         </div>
     </div>
 
-    <!-- ÁREA DE IMPRESSÃO REAL (Oculta na Tela) -->
+    <!-- ÁREA DE IMPRESSÃO REAL -->
     <div class="print-only print-page">
-        <!-- Parte Superior -->
         <div id="pHeader" class="header-print-area"></div>
         
-        <!-- Conteúdo Central -->
         <div class="content-print-area">
             <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 5mm;">DECLARAÇÃO</div>
             <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
@@ -195,7 +196,6 @@
             </div>
         </div>
         
-        <!-- Parte Inferior (Rodapé) -->
         <div id="pFooter" class="footer-print-area"></div>
     </div>
 
@@ -205,6 +205,22 @@
         let imgs = { h: '', s: '', f: '' };
 
         const $ = (id) => document.getElementById(id);
+
+        // Inicialização: Tentar carregar imagens salvas
+        window.onload = () => {
+            const savedH = localStorage.getItem('img_header');
+            const savedF = localStorage.getItem('img_footer');
+            const savedS = localStorage.getItem('img_sign');
+
+            if (savedH) imgs.h = savedH;
+            if (savedF) imgs.f = savedF;
+            if (savedS) imgs.s = savedS;
+
+            // Se já houver algo salvo, podemos mostrar o canvas vazio ou aguardar o CSV
+            // Por padrão, mantemos oculto até o primeiro registro ser selecionado.
+            
+            $('docDate').value = new Date().toISOString().split('T')[0];
+        };
 
         // Processar CSV
         $('csvFile').onchange = (e) => {
@@ -221,20 +237,40 @@
             r.readAsText(e.target.files[0]);
         };
 
-        // Carregar Imagens
-        const bindImage = (id, key) => {
+        // Carregar Imagens e Salvar no Storage
+        const bindImage = (id, key, storageKey) => {
             $(id).onchange = e => {
                 const r = new FileReader();
                 r.onload = ev => { 
-                    imgs[key] = ev.target.result; 
+                    const dataUrl = ev.target.result;
+                    imgs[key] = dataUrl;
+                    
+                    // Guardar no navegador
+                    try {
+                        localStorage.setItem(storageKey, dataUrl);
+                    } catch (err) {
+                        console.warn("Imagem muito grande para guardar no navegador. Funcionará apenas nesta sessão.");
+                    }
+                    
                     render(); 
                 };
                 r.readAsDataURL(e.target.files[0]);
             };
         };
-        bindImage('headIn', 'h'); 
-        bindImage('signIn', 's'); 
-        bindImage('footIn', 'f');
+
+        bindImage('headIn', 'h', 'img_header'); 
+        bindImage('signIn', 's', 'img_sign'); 
+        bindImage('footIn', 'f', 'img_footer');
+
+        function clearStoredImages() {
+            if (confirm("Deseja remover as imagens guardadas no navegador?")) {
+                localStorage.removeItem('img_header');
+                localStorage.removeItem('img_footer');
+                localStorage.removeItem('img_sign');
+                imgs = { h: '', s: '', f: '' };
+                render();
+            }
+        }
 
         // Busca
         $('searchBox').oninput = function() {
@@ -272,7 +308,6 @@
             
             const dateLine = `Formosa-GO, ${fullDateStr}.`;
 
-            // Atualizar Prévia e Impressão
             ['v', 'p'].forEach(prefix => {
                 $(prefix + 'Body').innerHTML = content;
                 $(prefix + 'Date').innerText = dateLine;
@@ -282,7 +317,6 @@
             });
         }
 
-        $('docDate').value = new Date().toISOString().split('T')[0];
         $('docDate').onchange = () => render();
         $('docShift').onchange = () => render();
     </script>
