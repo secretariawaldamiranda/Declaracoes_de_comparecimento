@@ -7,80 +7,80 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
- 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9; 
         }
 
         /* CONFIGURAÇÕES DE IMPRESSÃO - A4 REAL */
         @media print {
             .no-print { display: none !important; }
             .print-only { display: flex !important; }
- 
+            
             body { background: white; margin: 0; padding: 0; }
- 
-            @page {
-                size: A4;
-                margin: 0;
+            
+            @page { 
+                size: A4; 
+                margin: 0; 
             }
- 
-            .print-page {
-                width: 210mm;
-                height: 297mm;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                position: relative;
+            
+            .print-page { 
+                width: 210mm; 
+                height: 297mm; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: space-between; 
+                position: relative; 
                 background: white;
                 box-sizing: border-box;
                 page-break-after: always;
             }
- 
+            
             .header-print-area {
                 padding-top: 15mm;
                 width: 100%;
             }
 
             .content-print-area {
-                padding: 0 25mm;
-                flex-grow: 1;
+                padding: 0 25mm; 
+                flex-grow: 1; 
                 display: flex;
                 flex-direction: column;
             }
 
             .footer-print-area {
                 width: 100%;
-                padding-bottom: 10mm;
+                padding-bottom: 10mm; 
             }
         }
 
         .print-only { display: none; }
- 
-        .a4-preview {
-            width: 210mm;
-            min-height: 297mm;
-            background: white;
-            margin: 2rem auto;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
+        
+        .a4-preview { 
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            margin: 2rem auto; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-direction: column; 
             justify-content: space-between;
             font-family: 'Times New Roman', Times, serif;
             position: relative;
         }
 
-        .img-full {
-            width: 100%;
-            height: auto;
-            display: block;
+        .img-full { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
         }
 
-        .signature-img {
-            max-height: 45px;
-            width: auto;
-            display: block;
-            margin: 0 auto;
+        .signature-img { 
+            max-height: 45px; 
+            width: auto; 
+            display: block; 
+            margin: 0 auto; 
         }
     </style>
 </head>
@@ -90,21 +90,21 @@
     <div class="no-print fixed left-0 top-0 h-full w-80 bg-white border-r border-slate-200 shadow-xl p-8 z-50 overflow-y-auto">
         <header class="mb-10 text-center">
             <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-\[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Versão Corrigida ✨</p>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Versão Corrigida ✨</p>
         </header>
- 
+        
         <div class="space-y-8">
- 
+            
             <!-- 1. Configurações -->
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Dados do Documento</h3>
                 <div class="grid grid-cols-1 gap-4">
                     <div class="flex flex-col">
-                        <label class="text-\[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
                         <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
                     </div>
                     <div class="flex flex-col">
-                        <label class="text-\[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno</label>
                         <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 font-medium">
                             <option value="matutino">Matutino</option>
                             <option value="vespertino">Vespertino</option>
@@ -145,7 +145,7 @@
                             <span class="font-medium text-blue-600 italic">Outro (Digitar nome...)</span>
                         </label>
                     </div>
- 
+                    
                     <input type="text" id="manualName" placeholder="Digite o nome completo" class="hidden w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" oninput="render()">
                 </div>
             </div>
@@ -163,14 +163,14 @@
     <div class="lg:ml-80 flex justify-center no-print min-h-screen pb-10">
         <div id="canvas" class="a4-preview hidden">
             <div id="vHeader"></div>
- 
-            <div class="p-\[15mm\_25mm] flex-grow">
+            
+            <div class="p-[15mm_25mm] flex-grow">
                 <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
-                <div id="vBody" class="text-xl leading-\[1.8] text-justify text-slate-800"></div>
+                <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                 <div id="vDate" class="text-right text-lg mt-12"></div>
- 
+                
                 <div class="mt-32 flex flex-col items-center">
-                    <div id="vSign" class="relative z-0 h-\[45px] flex items-end -mb-\[18px]"></div>
+                    <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                     <div class="w-80 border-t border-black relative z-10"></div>
                     <div class="text-center mt-3">
                         <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
@@ -195,19 +195,19 @@
         <div id="pHeader" class="header-print-area"></div>
         <div class="content-print-area">
             <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 10mm;">DECLARAÇÃO</div>
-            <div id="pBody" class="text-\[14pt] leading-\[1.8] text-justify"></div>
-            <div id="pDate" class="text-right text-\[14pt] mt-12"></div>
- 
+            <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
+            <div id="pDate" class="text-right text-[14pt] mt-12"></div>
+            
             <div class="flex flex-col items-center" style="margin-top: 40mm;">
-                <div id="pSign" class="relative z-0 h-\[45px] flex items-end -mb-\[18px]"></div>
+                <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                 <div class="w-80 border-t border-black relative z-10"></div>
                 <div class="text-center mt-3">
-                    <p class="font-bold uppercase text-\[14pt]">Elaine Lopes da Luz Almeida</p>
-                    <p class="text-\[12pt]">Diretora</p>
+                    <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
+                    <p class="text-[12pt]">Diretora</p>
                 </div>
             </div>
         </div>
- 
+        
         <div id="pFooter" class="footer-print-area"></div>
     </div>
 
@@ -246,7 +246,7 @@
                 .catch(err => {
                     console.error(err);
                     $('searchBox').placeholder = "CUBO.CSV não encontrado no GitHub.";
-                    // Em caso de erro, permitir carregar manualmente se o input existisse,
+                    // Em caso de erro, permitir carregar manualmente se o input existisse, 
                     // mas como ocultamos, apenas mostramos a mensagem de erro.
                 });
         }
@@ -257,7 +257,7 @@
 
             // Identificação dinâmica das colunas pelo cabeçalho
             const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
- 
+            
             const idx = {
                 aluno: headers.indexOf("aluno"),
                 mae: headers.findIndex(h => h.includes("mãe") || h.includes("mae")),
@@ -274,7 +274,7 @@
                     r: idx.resp !== -1 ? (c[idx.resp] || "").trim() : ""
                 };
             }).filter(item => item.a !== "");
- 
+            
             if (db.length > 0) {
                 $('searchBox').disabled = false;
                 $('searchBox').placeholder = `Pesquisar em ${db.length} nomes...`;
@@ -303,7 +303,7 @@
             m.forEach(item => {
                 const d = document.createElement('div');
                 d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
-                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-\[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
+                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
                 d.onclick = () => {
                     selected = item;
                     $('searchBox').value = item.a;
@@ -311,11 +311,11 @@
                     $('canvas').classList.remove('hidden');
                     $('empty-state').classList.add('hidden');
                     $('selectorArea').classList.remove('hidden');
- 
+                    
                     $('optMae').innerText = item.m || "(Vazio)";
                     $('optPai').innerText = item.p || "(Vazio)";
                     $('optResp').innerText = item.r || "(Vazio)";
- 
+                    
                     document.querySelector('input[value="mae"]').checked = true;
                     $('manualName').classList.add('hidden');
                     render();
@@ -336,7 +336,7 @@
             const dv = $('docDate').value;
             const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
             const [y, m, d] = dv.split('-');
-            const dataExt = `${d} de ${meses\[parseInt(m)-1]} de ${y}`;
+            const dataExt = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
             const turno = $('docShift').value;
 
             const type = document.querySelector('input[name="respType"]:checked').value;
@@ -349,7 +349,7 @@
             if(!declName || declName === "") declName = "____________________";
 
             const body = `Declaro para os devidos fins legais que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExt}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
- 
+            
             const city = `Formosa-GO, ${dataExt}.`;
 
             ['v', 'p'].forEach(prefix => {
