@@ -16,134 +16,108 @@
             padding: 0;
         }
 
-        /* --- CONFIGURAÇÕES DE IMPRESSÃO (CRÍTICO) --- */
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
         @media print {
-            /* Remove qualquer resíduo de layout do navegador */
-            html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                height: 297mm !important;
-                width: 210mm !important;
-                overflow: hidden !important;
-                display: block !important;
-                background: white !important;
-            }
-
-            /* Esconde TUDO que não seja a área de impressão */
-            .no-print { 
-                display: none !important; 
-                height: 0 !important;
-                width: 0 !important;
-                visibility: hidden !important;
-            }
-
-            .print-only { 
-                display: flex !important; 
-                visibility: visible !important;
-            }
+            /* 1. Esconde tudo o que não é a folha */
+            .no-print { display: none !important; }
             
+            /* 2. Reseta o fundo e margens do navegador */
+            body { 
+                background: white !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
+            }
+
+            /* 3. Configura a página A4 para ocupar 100% sem bordas do sistema */
             @page { 
                 size: A4; 
                 margin: 0; 
             }
-            
-            /* Folha A4 Perfeita */
-            .print-page { 
-                width: 210mm; 
-                height: 296.5mm; /* Ligeiramente menor para evitar 2ª página em branco */
-                display: flex; 
-                flex-direction: column; 
-                justify-content: space-between; 
-                position: relative; 
-                background: white;
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-                page-break-after: avoid;
-                page-break-before: avoid;
-            }
-            
-            .header-area {
-                padding-top: 10mm;
-                width: 100%;
-            }
 
-            .content-area {
-                padding: 0 25mm; 
-                flex-grow: 1; 
-                display: flex;
-                flex-direction: column;
-            }
-
-            .footer-area {
-                width: 100%;
-                padding-bottom: 10mm; 
+            /* 4. Força a div da folha a ser a única coisa visível e no tamanho real */
+            #canvas {
+                display: flex !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 210mm;
+                height: 297mm;
+                margin: 0 !important;
+                box-shadow: none !important;
+                z-index: 9999;
             }
         }
 
         /* --- INTERFACE DO SITE --- */
-        .print-only { display: none; }
-        
-        /* Container para visualização no site */
         .preview-container {
             width: 100%;
             overflow-x: auto;
             padding: 20px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
         }
 
-        .a4-preview { 
+        /* A folha A4 no ecrã */
+        #canvas { 
             width: 210mm; 
-            min-height: 297mm; 
+            height: 297mm; 
             background: white; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
             display: flex; 
             flex-direction: column; 
             justify-content: space-between;
             font-family: 'Times New Roman', Times, serif;
             position: relative;
             flex-shrink: 0;
+            transition: opacity 0.3s;
         }
 
-        .img-header-footer { 
-            width: 100%; 
-            height: auto; 
-            display: block; 
+        .img-header-footer { width: 100%; height: auto; display: block; }
+
+        /* Estilo da Assinatura */
+        .signature-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30mm;
         }
 
-        /* Estilo da Assinatura (Atrás da Linha) */
         .signature-img { 
             max-height: 45px; 
             width: auto; 
-            display: block; 
-            margin: 0 auto; 
+            margin-bottom: -18px; 
+            z-index: 0;
+            position: relative;
         }
 
-        /* Scrollbar para mobile */
-        .preview-container::-webkit-scrollbar { height: 6px; }
-        .preview-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .signature-line {
+            width: 85mm;
+            border-top: 1px solid black;
+            z-index: 10;
+            position: relative;
+        }
     </style>
 </head>
 <body class="flex flex-col lg:flex-row">
 
-    <!-- MENU LATERAL (Mobile: Topo / Desktop: Esquerda) -->
-    <div class="no-print w-full lg:w-80 lg:fixed lg:h-full bg-white border-b lg:border-b-0 lg:border-r border-slate-200 shadow-lg p-6 z-50 overflow-y-auto">
-        <div class="text-center mb-8">
+    <!-- Menu Lateral (Oculto na impressão) -->
+    <div class="no-print w-full lg:w-80 lg:fixed lg:h-full bg-white border-r border-slate-200 shadow-xl p-6 z-50 overflow-y-auto">
+        <header class="mb-8 text-center">
             <h1 class="text-2xl font-bold text-slate-800">Escola Digital</h1>
-            <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Versão 5.0 Pro</span>
-        </div>
+            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Impressão 1:1 Ativa</p>
+        </header>
         
         <div class="space-y-6">
-            <!-- 1. Automáticos -->
+            <!-- Data e Turno -->
             <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Data</label>
-                    <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data</label>
+                    <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Turno</label>
-                    <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Turno</label>
+                    <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
                         <option value="matutino">Matutino</option>
                         <option value="vespertino">Vespertino</option>
                         <option value="noturno">Noturno</option>
@@ -151,259 +125,183 @@
                 </div>
             </div>
 
-            <!-- 2. Busca do Aluno -->
+            <!-- Pesquisa -->
             <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Pesquisar Aluno</label>
+                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Pesquisar Aluno</label>
                 <div class="relative">
-                    <input type="text" id="searchBox" placeholder="Carregando base..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all disabled:opacity-50 shadow-sm" disabled>
+                    <input type="text" id="searchBox" placeholder="Carregando..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none shadow-sm disabled:opacity-50" disabled>
                     <div id="results" class="absolute z-[100] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-64 overflow-y-auto hidden"></div>
                 </div>
             </div>
 
-            <!-- 3. Opções de Declarante (Aparece após busca) -->
-            <div id="guardianArea" class="hidden space-y-3 animate-in fade-in duration-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase border-b pb-1">Quem Compareceu?</h3>
+            <!-- Declarante -->
+            <div id="selectorArea" class="hidden space-y-4 animate-in slide-in-from-top duration-300">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quem Compareceu?</h3>
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-3">
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
-                            <input type="radio" name="resp" value="mae" checked onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700">Mãe: <b id="lblMae"></b></span>
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="resp" value="mae" checked onchange="render()">
+                            <span>Mãe: <b id="lblMae"></b></span>
                         </label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
-                            <input type="radio" name="resp" value="pai" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700">Pai: <b id="lblPai"></b></span>
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="resp" value="pai" onchange="render()">
+                            <span>Pai: <b id="lblPai"></b></span>
                         </label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
-                            <input type="radio" name="resp" value="outro" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700 text-xs">Resp: <b id="lblResp"></b></span>
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="resp" value="outro" onchange="render()">
+                            <span>Responsável: <b id="lblResp"></b></span>
                         </label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
-                            <input type="radio" name="resp" value="manual" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="font-medium text-blue-600 italic text-xs">Outro (Digitar nome)</span>
+                        <label class="flex items-center gap-2 cursor-pointer p-1">
+                            <input type="radio" name="resp" value="manual" onchange="render()">
+                            <span class="font-medium text-blue-600">Outro (Digitar...)</span>
                         </label>
                     </div>
-                    <input type="text" id="manualName" placeholder="Nome completo do declarante" class="hidden w-full p-3 border border-blue-200 rounded-xl text-sm outline-none shadow-inner" oninput="render()">
+                    <input type="text" id="manualName" placeholder="Nome completo" class="hidden w-full p-3 border rounded-xl text-sm outline-none shadow-inner" oninput="render()">
                 </div>
             </div>
 
-            <!-- Botão Imprimir -->
-            <div class="pt-4">
-                <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                    IMPRIMIR
-                </button>
-            </div>
+            <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                IMPRIMIR
+            </button>
         </div>
     </div>
 
-    <!-- ÁREA DE VISUALIZAÇÃO NO SITE -->
-    <div class="flex-1 lg:ml-80 min-h-screen">
+    <!-- Área da Folha -->
+    <div class="flex-1 lg:ml-80">
         <div class="preview-container no-print">
-            <div id="canvas" class="a4-preview hidden">
+            <div id="canvas" class="hidden">
                 <div id="vHeader"></div>
-                
                 <div class="p-[15mm_25mm] flex-grow">
                     <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
                     <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                     <div id="vDate" class="text-right text-lg mt-12"></div>
-                    
-                    <!-- Assinatura -->
-                    <div class="mt-32 flex flex-col items-center">
-                        <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
-                        <div class="w-80 border-t border-black relative z-10"></div>
+                    <div class="signature-box">
+                        <div id="vSign"></div>
+                        <div class="signature-line"></div>
                         <div class="text-center mt-3">
                             <p class="font-bold uppercase text-lg">Elaine Lopes da Luz Almeida</p>
                             <p class="text-slate-500">Diretora</p>
                         </div>
                     </div>
                 </div>
-
-                <div id="vFooter" class="mt-auto"></div>
+                <div id="vFooter"></div>
             </div>
 
-            <!-- Estado Vazio -->
-            <div id="emptyState" class="flex flex-col items-center justify-center text-slate-300 mt-32 text-center px-6">
+            <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-40">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
-                <p class="text-lg opacity-40 italic">Pesquise o nome do aluno para gerar a declaração.<br><small>No telemóvel, deslize para o lado para ver a folha completa.</small></p>
+                <p class="text-lg opacity-40">Pesquise o aluno para ver a folha.</p>
             </div>
-        </div>
-    </div>
-
-    <!-- --- ÁREA DE IMPRESSÃO REAL (Oculta no navegador) --- -->
-    <div class="print-only">
-        <div class="print-page">
-            <div id="pHeader" class="header-area"></div>
-            <div class="content-area">
-                <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
-                <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
-                <div id="pDate" class="text-right text-[14pt] mt-12"></div>
-                
-                <div class="flex flex-col items-center" style="margin-top: auto; margin-bottom: 30mm;">
-                    <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
-                    <div class="w-80 border-t border-black relative z-10"></div>
-                    <div class="text-center mt-3">
-                        <p class="font-bold uppercase text-[14pt]">Elaine Lopes da Luz Almeida</p>
-                        <p class="text-[12pt]">Diretora</p>
-                    </div>
-                </div>
-            </div>
-            <div id="pFooter" class="footer-area"></div>
         </div>
     </div>
 
     <script>
         let db = [];
-        let selectedAluno = null;
-        let images = { head: 'cabecalho.png', sign: 'assinatura.png', foot: 'rodape.png' };
+        let selected = null;
+        let images = { h: 'cabecalho.png', s: 'assinatura.png', f: 'rodape.png' };
 
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
-            // 1. Detectar Data e Turno
             const agora = new Date();
-            const dataIso = new Date(agora.getTime() - (agora.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-            $('docDate').value = dataIso;
+            const dataLocal = new Date(agora.getTime() - (agora.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            $('docDate').value = dataLocal;
 
-            const hora = agora.getHours();
+            const h = agora.getHours();
             let turno = "noturno";
-            if (hora >= 5 && hora < 12) turno = "matutino";
-            else if (hora >= 12 && hora < 18) turno = "vespertino";
+            if (h >= 5 && h < 12) turno = "matutino";
+            else if (h >= 12 && h < 18) turno = "vespertino";
             $('docShift').value = turno;
 
-            // 2. Carregar Recursos
-            loadImages();
-            loadCSV();
+            fetch('CUBO.CSV').then(r => r.text()).then(t => parseCSV(t));
+            loadAssets();
         };
 
-        function loadCSV() {
-            fetch('CUBO.CSV')
-                .then(res => res.text())
-                .then(text => {
-                    const lines = text.split('\n').filter(l => l.trim() !== "");
-                    if (lines.length < 1) return;
-
-                    const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
-                    
-                    // Identifica índices dinamicamente pelo nome da coluna
-                    const idx = {
-                        aluno: headers.indexOf("aluno"),
-                        mae: headers.findIndex(h => h.includes("mãe") || h.includes("mae")),
-                        pai: headers.indexOf("pai"),
-                        resp: headers.findIndex(h => h.includes("responsável") || h.includes("responsavel"))
-                    };
-
-                    db = lines.slice(1).map(l => {
-                        const c = l.split(';');
-                        return {
-                            a: idx.aluno !== -1 ? (c[idx.aluno] || "").trim() : (c[0] || "").trim(),
-                            m: idx.mae !== -1 ? (c[idx.mae] || "").trim() : (c[2] || "").trim(),
-                            p: idx.pai !== -1 ? (c[idx.pai] || "").trim() : (c[1] || "").trim(),
-                            r: idx.resp !== -1 ? (c[idx.resp] || "").trim() : (c[3] || "").trim()
-                        };
-                    }).filter(i => i.a !== "");
-
-                    if (db.length > 0) {
-                        $('searchBox').disabled = false;
-                        $('searchBox').placeholder = `Pesquisar em ${db.length} alunos...`;
-                    }
-                })
-                .catch(() => {
-                    $('searchBox').placeholder = "Ficheiro CUBO.CSV não encontrado.";
-                });
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(l => l.trim() !== "");
+            const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+            const idx = {
+                a: headers.indexOf("aluno"),
+                m: headers.findIndex(h => h.includes("mae") || h.includes("mãe")),
+                p: headers.indexOf("pai"),
+                r: headers.findIndex(h => h.includes("responsavel") || h.includes("responsável"))
+            };
+            db = lines.slice(1).map(l => {
+                const c = l.split(';');
+                return {
+                    a: (c[idx.a] || "").trim(),
+                    m: (c[idx.m] || "").trim(),
+                    p: idx.p !== -1 ? (c[idx.p] || "").trim() : "",
+                    r: idx.r !== -1 ? (c[idx.r] || "").trim() : ""
+                };
+            }).filter(i => i.a !== "");
+            $('searchBox').disabled = false;
+            $('searchBox').placeholder = "Pesquisar registro...";
         }
 
-        function loadImages() {
-            const targets = [{id:'head', src:'cabecalho.png'}, {id:'sign', src:'assinatura.png'}, {id:'foot', src:'rodape.png'}];
-            targets.forEach(t => {
+        function loadAssets() {
+            [{k:'h',s:'cabecalho.png'},{k:'s',s:'assinatura.png'},{k:'f',s:'rodape.png'}].forEach(t => {
                 const img = new Image();
                 img.onload = () => render();
-                img.onerror = () => { images[t.id] = ''; render(); };
-                img.src = t.src;
+                img.onerror = () => { images[t.k] = ''; render(); };
+                img.src = t.s;
             });
         }
 
         $('searchBox').oninput = function() {
             const val = this.value.toLowerCase();
-            const resDiv = $('results');
-            if (val.length < 2) return resDiv.classList.add('hidden');
-            
+            const res = $('results');
+            if (val.length < 2) return res.classList.add('hidden');
             const matches = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)).slice(0, 5);
-            resDiv.innerHTML = '';
-            resDiv.classList.toggle('hidden', matches.length === 0);
-            
+            res.innerHTML = '';
+            res.classList.toggle('hidden', matches.length === 0);
             matches.forEach(item => {
                 const d = document.createElement('div');
-                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
-                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
+                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm";
+                d.innerHTML = `<div><b class="uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400">Mãe: ${item.m}</div>`;
                 d.onclick = () => {
-                    selectAluno(item);
-                    resDiv.classList.add('hidden');
+                    selected = item;
+                    $('searchBox').value = item.a;
+                    res.classList.add('hidden');
+                    $('canvas').classList.remove('hidden');
+                    $('empty-state').classList.add('hidden');
+                    $('selectorArea').classList.remove('hidden');
+                    $('lblMae').innerText = item.m || "---";
+                    $('lblPai').innerText = item.p || "---";
+                    $('lblResp').innerText = item.r || "---";
+                    render();
                 };
-                resDiv.appendChild(d);
+                res.appendChild(d);
             });
         };
 
-        function selectAluno(item) {
-            selectedAluno = item;
-            $('searchBox').value = item.a;
-            $('canvas').classList.remove('hidden');
-            $('emptyState').classList.add('hidden');
-            $('guardianArea').classList.remove('hidden');
-            
-            // Atualiza labels dos responsáveis
-            $('lblMae').innerText = item.m || "(Vazio)";
-            $('lblPai').innerText = item.p || "(Vazio)";
-            $('lblResp').innerText = item.r || "(Vazio)";
-            
-            // Padrão: Mãe
-            document.querySelector('input[value="mae"]').checked = true;
-            $('manualName').classList.add('hidden');
-            render();
-        }
-
-        function handleRespChange() {
-            const val = document.querySelector('input[name="resp"]:checked').value;
-            $('manualName').classList.toggle('hidden', val !== 'manual');
-            if (val === 'manual') {
-                $('manualName').focus();
-                $('manualName').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            render();
-        }
-
         function render() {
-            if (!selectedAluno) return;
-            
-            const rawDate = $('docDate').value;
+            if (!selected) return;
+            const dv = $('docDate').value;
             const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-            const [y, m, d] = rawDate.split('-');
-            const dataExtenso = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
+            const [y, m, d] = dv.split('-');
+            const dataExt = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
             const turno = $('docShift').value;
 
-            // Determina nome do declarante
-            const respType = document.querySelector('input[name="resp"]:checked').value;
-            let nomeDeclarante = "";
-            if (respType === 'mae') nomeDeclarante = selectedAluno.m;
-            else if (respType === 'pai') nomeDeclarante = selectedAluno.p;
-            else if (respType === 'outro') nomeDeclarante = selectedAluno.r;
-            else nomeDeclarante = $('manualName').value;
-
-            if (!nomeDeclarante || nomeDeclarante.trim() === "") nomeDeclarante = "__________________________________";
-
-            const corpoTexto = `Declaro para os devidos fins legais que, <strong>${nomeDeclarante.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExtenso}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selectedAluno.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
+            const resp = document.querySelector('input[name="resp"]:checked').value;
+            let declName = "";
+            const mInp = $('manualName');
+            mInp.classList.toggle('hidden', resp !== 'manual');
             
-            const linhaLocal = `Formosa-GO, ${dataExtenso}.`;
+            if (resp === 'mae') declName = selected.m;
+            else if (resp === 'pai') declName = selected.p;
+            else if (resp === 'outro') declName = selected.r;
+            else declName = mInp.value;
 
-            // Renderiza na prévia e na impressão
-            ['v', 'p'].forEach(pre => {
-                $(pre + 'Body').innerHTML = corpoTexto;
-                $(pre + 'Date').innerText = linhaLocal;
-                $(pre + 'Header').innerHTML = images.head ? `<img src="${images.head}" class="img-header-footer">` : '';
-                $(pre + 'Footer').innerHTML = images.foot ? `<img src="${images.foot}" class="img-header-footer">` : '';
-                $(pre + 'Sign').innerHTML = images.sign ? `<img src="${images.sign}" class="signature-img">` : '';
-            });
+            if(!declName) declName = "____________________";
+
+            $('vBody').innerHTML = `Declaro para os devidos fins legais que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExt}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
+            $('vDate').innerText = `Formosa-GO, ${dataExt}.`;
+            $('vHeader').innerHTML = images.h ? `<img src="${images.h}" class="img-header-footer">` : '';
+            $('vFooter').innerHTML = images.f ? `<img src="${images.f}" class="img-header-footer">` : '';
+            $('vSign').innerHTML = images.s ? `<img src="${images.s}" class="signature-img">` : '';
         }
 
         $('docDate').onchange = () => render();
