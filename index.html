@@ -4,39 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Declarações Escolares - Oficial</title>
+    <title>Sistema de Declarações Escolares</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9; 
+            background-color: #f1f5f9;
             margin: 0;
             padding: 0;
         }
 
-        /* CONFIGURAÇÕES DE IMPRESSÃO - CORREÇÃO DE PÁGINAS EM BRANCO */
+        /* --- CONFIGURAÇÕES DE IMPRESSÃO (CRÍTICO) --- */
         @media print {
-            /* Forçar o reset do layout flex do telemóvel */
+            /* Remove qualquer resíduo de layout do navegador */
             html, body {
-                height: 100%;
-                width: 100%;
                 margin: 0 !important;
                 padding: 0 !important;
+                height: 297mm !important;
+                width: 210mm !important;
+                overflow: hidden !important;
                 display: block !important;
-                background: white;
+                background: white !important;
             }
 
+            /* Esconde TUDO que não seja a área de impressão */
             .no-print { 
                 display: none !important; 
                 height: 0 !important;
                 width: 0 !important;
-                overflow: hidden !important;
+                visibility: hidden !important;
             }
 
             .print-only { 
                 display: flex !important; 
+                visibility: visible !important;
             }
             
             @page { 
@@ -44,46 +47,48 @@
                 margin: 0; 
             }
             
+            /* Folha A4 Perfeita */
             .print-page { 
                 width: 210mm; 
-                height: 296mm; /* Segurança para evitar 2ª página */
+                height: 296.5mm; /* Ligeiramente menor para evitar 2ª página em branco */
                 display: flex; 
                 flex-direction: column; 
                 justify-content: space-between; 
                 position: relative; 
                 background: white;
                 box-sizing: border-box;
-                overflow: hidden;
+                margin: 0;
+                padding: 0;
                 page-break-after: avoid;
                 page-break-before: avoid;
-                margin: 0 auto;
             }
             
-            .header-print-area {
+            .header-area {
                 padding-top: 10mm;
                 width: 100%;
             }
 
-            .content-print-area {
+            .content-area {
                 padding: 0 25mm; 
                 flex-grow: 1; 
                 display: flex;
                 flex-direction: column;
             }
 
-            .footer-print-area {
+            .footer-area {
                 width: 100%;
                 padding-bottom: 10mm; 
             }
         }
 
+        /* --- INTERFACE DO SITE --- */
         .print-only { display: none; }
         
-        /* Ajuste do Canvas para visualização no navegador */
-        .a4-container {
+        /* Container para visualização no site */
+        .preview-container {
             width: 100%;
             overflow-x: auto;
-            padding: 1rem;
+            padding: 20px;
             display: flex;
             justify-content: center;
         }
@@ -92,7 +97,7 @@
             width: 210mm; 
             min-height: 297mm; 
             background: white; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
             display: flex; 
             flex-direction: column; 
             justify-content: space-between;
@@ -101,12 +106,13 @@
             flex-shrink: 0;
         }
 
-        .img-full { 
+        .img-header-footer { 
             width: 100%; 
             height: auto; 
             display: block; 
         }
 
+        /* Estilo da Assinatura (Atrás da Linha) */
         .signature-img { 
             max-height: 45px; 
             width: auto; 
@@ -114,76 +120,74 @@
             margin: 0 auto; 
         }
 
-        /* Scrollbar lateral para mobile */
-        .a4-container::-webkit-scrollbar { height: 6px; }
-        .a4-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        /* Scrollbar para mobile */
+        .preview-container::-webkit-scrollbar { height: 6px; }
+        .preview-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="flex flex-col lg:flex-row min-h-screen">
+<body class="flex flex-col lg:flex-row">
 
-    <!-- Menu Lateral (Oculto na impressão) -->
-    <div class="no-print w-full lg:w-80 lg:fixed lg:h-full bg-white border-b lg:border-b-0 lg:border-r border-slate-200 shadow-xl p-6 lg:p-8 z-50 overflow-y-auto">
-        <header class="mb-6 lg:mb-10 text-center">
-            <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight">Escola Digital</h1>
-            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">Correção de Impressão ✨</p>
-        </header>
+    <!-- MENU LATERAL (Mobile: Topo / Desktop: Esquerda) -->
+    <div class="no-print w-full lg:w-80 lg:fixed lg:h-full bg-white border-b lg:border-b-0 lg:border-r border-slate-200 shadow-lg p-6 z-50 overflow-y-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-slate-800">Escola Digital</h1>
+            <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Versão 5.0 Pro</span>
+        </div>
         
-        <div class="space-y-6 lg:space-y-8">
-            <!-- 1. Dados -->
-            <div class="space-y-3">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Dados do Documento</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Data</label>
-                        <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50">
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 ml-1">Turno</label>
-                        <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-slate-50 font-medium">
-                            <option value="matutino">Matutino</option>
-                            <option value="vespertino">Vespertino</option>
-                            <option value="noturno">Noturno</option>
-                        </select>
-                    </div>
+        <div class="space-y-6">
+            <!-- 1. Automáticos -->
+            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Data</label>
+                    <input type="date" id="docDate" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Turno</label>
+                    <select id="docShift" class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                        <option value="matutino">Matutino</option>
+                        <option value="vespertino">Vespertino</option>
+                        <option value="noturno">Noturno</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- 2. Pesquisa -->
-            <div class="space-y-3">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
+            <!-- 2. Busca do Aluno -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Pesquisar Aluno</label>
                 <div class="relative">
-                    <input type="text" id="searchBox" placeholder="A carregar dados..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
-                    <div id="results" class="absolute z-[60] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-60 lg:max-h-72 overflow-y-auto hidden"></div>
+                    <input type="text" id="searchBox" placeholder="Carregando base..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all disabled:opacity-50 shadow-sm" disabled>
+                    <div id="results" class="absolute z-[100] left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-64 overflow-y-auto hidden"></div>
                 </div>
             </div>
 
-            <!-- 3. Responsável -->
-            <div id="selectorArea" class="hidden space-y-4 animate-in slide-in-from-top duration-300">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Declarante</h3>
+            <!-- 3. Opções de Declarante (Aparece após busca) -->
+            <div id="guardianArea" class="hidden space-y-3 animate-in fade-in duration-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase border-b pb-1">Quem Compareceu?</h3>
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-3">
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer p-1">
-                            <input type="radio" name="respType" value="mae" checked onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700">Mãe: <span id="optMae" class="font-bold"></span></span>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
+                            <input type="radio" name="resp" value="mae" checked onchange="handleRespChange()" class="w-4 h-4">
+                            <span class="text-slate-700">Mãe: <b id="lblMae"></b></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer p-1">
-                            <input type="radio" name="respType" value="pai" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700">Pai: <span id="optPai" class="font-bold"></span></span>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
+                            <input type="radio" name="resp" value="pai" onchange="handleRespChange()" class="w-4 h-4">
+                            <span class="text-slate-700">Pai: <b id="lblPai"></b></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer p-1">
-                            <input type="radio" name="respType" value="outro" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="text-slate-700">Responsável: <span id="optResp" class="font-bold"></span></span>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
+                            <input type="radio" name="resp" value="outro" onchange="handleRespChange()" class="w-4 h-4">
+                            <span class="text-slate-700 text-xs">Resp: <b id="lblResp"></b></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer p-1">
-                            <input type="radio" name="respType" value="manual" onchange="handleRespChange()" class="w-4 h-4">
-                            <span class="font-medium text-blue-600 italic">Outro (Digitar nome...)</span>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-colors">
+                            <input type="radio" name="resp" value="manual" onchange="handleRespChange()" class="w-4 h-4">
+                            <span class="font-medium text-blue-600 italic text-xs">Outro (Digitar nome)</span>
                         </label>
                     </div>
-                    <input type="text" id="manualName" placeholder="Digite o nome completo" class="hidden w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" oninput="render()">
+                    <input type="text" id="manualName" placeholder="Nome completo do declarante" class="hidden w-full p-3 border border-blue-200 rounded-xl text-sm outline-none shadow-inner" oninput="render()">
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-100">
+            <!-- Botão Imprimir -->
+            <div class="pt-4">
                 <button onclick="window.print()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 text-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     IMPRIMIR
@@ -192,15 +196,18 @@
         </div>
     </div>
 
-    <!-- Área de Visualização Principal -->
+    <!-- ÁREA DE VISUALIZAÇÃO NO SITE -->
     <div class="flex-1 lg:ml-80 min-h-screen">
-        <div class="a4-container no-print">
+        <div class="preview-container no-print">
             <div id="canvas" class="a4-preview hidden">
                 <div id="vHeader"></div>
+                
                 <div class="p-[15mm_25mm] flex-grow">
                     <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
                     <div id="vBody" class="text-xl leading-[1.8] text-justify text-slate-800"></div>
                     <div id="vDate" class="text-right text-lg mt-12"></div>
+                    
+                    <!-- Assinatura -->
                     <div class="mt-32 flex flex-col items-center">
                         <div id="vSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                         <div class="w-80 border-t border-black relative z-10"></div>
@@ -210,26 +217,29 @@
                         </div>
                     </div>
                 </div>
+
                 <div id="vFooter" class="mt-auto"></div>
             </div>
 
-            <div id="empty-state" class="flex flex-col items-center justify-center text-slate-300 mt-20 lg:mt-40 px-4 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 lg:h-24 w-16 lg:w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Estado Vazio -->
+            <div id="emptyState" class="flex flex-col items-center justify-center text-slate-300 mt-32 text-center px-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
-                <p class="text-base lg:text-lg opacity-40 italic">Inicie a pesquisa para gerar o documento.</p>
+                <p class="text-lg opacity-40 italic">Pesquise o nome do aluno para gerar a declaração.<br><small>No telemóvel, deslize para o lado para ver a folha completa.</small></p>
             </div>
         </div>
     </div>
 
-    <!-- DOCUMENTO DE IMPRESSÃO (Fora do fluxo normal) -->
+    <!-- --- ÁREA DE IMPRESSÃO REAL (Oculta no navegador) --- -->
     <div class="print-only">
         <div class="print-page">
-            <div id="pHeader" class="header-print-area"></div>
-            <div class="content-print-area">
+            <div id="pHeader" class="header-area"></div>
+            <div class="content-area">
                 <div class="text-center font-bold text-2xl mb-12 underline uppercase tracking-widest" style="margin-top: 15mm;">DECLARAÇÃO</div>
                 <div id="pBody" class="text-[14pt] leading-[1.8] text-justify"></div>
                 <div id="pDate" class="text-right text-[14pt] mt-12"></div>
+                
                 <div class="flex flex-col items-center" style="margin-top: auto; margin-bottom: 30mm;">
                     <div id="pSign" class="relative z-0 h-[45px] flex items-end -mb-[18px]"></div>
                     <div class="w-80 border-t border-black relative z-10"></div>
@@ -239,21 +249,22 @@
                     </div>
                 </div>
             </div>
-            <div id="pFooter" class="footer-print-area"></div>
+            <div id="pFooter" class="footer-area"></div>
         </div>
     </div>
 
     <script>
         let db = [];
-        let selected = null;
-        let imgs = { h: 'cabecalho.png', s: 'assinatura.png', f: 'rodape.png' };
+        let selectedAluno = null;
+        let images = { head: 'cabecalho.png', sign: 'assinatura.png', foot: 'rodape.png' };
 
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
+            // 1. Detectar Data e Turno
             const agora = new Date();
-            const dataLocal = new Date(agora.getTime() - (agora.getTimezoneOffset()*60*1000)).toISOString().split('T')[0];
-            $('docDate').value = dataLocal;
+            const dataIso = new Date(agora.getTime() - (agora.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            $('docDate').value = dataIso;
 
             const hora = agora.getHours();
             let turno = "noturno";
@@ -261,112 +272,142 @@
             else if (hora >= 12 && hora < 18) turno = "vespertino";
             $('docShift').value = turno;
 
-            loadAssets();
-            checkAndLoadDefaultCSV();
+            // 2. Carregar Recursos
+            loadImages();
+            loadCSV();
         };
 
-        function checkAndLoadDefaultCSV() {
+        function loadCSV() {
             fetch('CUBO.CSV')
-                .then(response => response.text())
-                .then(text => parseCSV(text))
-                .catch(() => { $('searchBox').placeholder = "CUBO.CSV não encontrado."; });
+                .then(res => res.text())
+                .then(text => {
+                    const lines = text.split('\n').filter(l => l.trim() !== "");
+                    if (lines.length < 1) return;
+
+                    const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+                    
+                    // Identifica índices dinamicamente pelo nome da coluna
+                    const idx = {
+                        aluno: headers.indexOf("aluno"),
+                        mae: headers.findIndex(h => h.includes("mãe") || h.includes("mae")),
+                        pai: headers.indexOf("pai"),
+                        resp: headers.findIndex(h => h.includes("responsável") || h.includes("responsavel"))
+                    };
+
+                    db = lines.slice(1).map(l => {
+                        const c = l.split(';');
+                        return {
+                            a: idx.aluno !== -1 ? (c[idx.aluno] || "").trim() : (c[0] || "").trim(),
+                            m: idx.mae !== -1 ? (c[idx.mae] || "").trim() : (c[2] || "").trim(),
+                            p: idx.pai !== -1 ? (c[idx.pai] || "").trim() : (c[1] || "").trim(),
+                            r: idx.resp !== -1 ? (c[idx.resp] || "").trim() : (c[3] || "").trim()
+                        };
+                    }).filter(i => i.a !== "");
+
+                    if (db.length > 0) {
+                        $('searchBox').disabled = false;
+                        $('searchBox').placeholder = `Pesquisar em ${db.length} alunos...`;
+                    }
+                })
+                .catch(() => {
+                    $('searchBox').placeholder = "Ficheiro CUBO.CSV não encontrado.";
+                });
         }
 
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim() !== "");
-            if (lines.length < 1) return;
-            const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
-            const idx = {
-                aluno: headers.indexOf("aluno"),
-                mae: headers.findIndex(h => h.includes("mãe") || h.includes("mae")),
-                pai: headers.indexOf("pai"),
-                resp: headers.findIndex(h => h.includes("responsável") || h.includes("responsavel"))
-            };
-            db = lines.slice(1).map(l => {
-                const c = l.split(';');
-                return {
-                    a: idx.aluno !== -1 ? (c[idx.aluno] || "").trim() : (c[0] || "").trim(),
-                    m: idx.mae !== -1 ? (c[idx.mae] || "").trim() : (c[1] || "").trim(),
-                    p: idx.pai !== -1 ? (c[idx.pai] || "").trim() : "",
-                    r: idx.resp !== -1 ? (c[idx.resp] || "").trim() : ""
-                };
-            }).filter(item => item.a !== "");
-            if (db.length > 0) {
-                $('searchBox').disabled = false;
-                $('searchBox').placeholder = `Pesquisar em ${db.length} nomes...`;
-            }
-        }
-
-        function loadAssets() {
-            const targets = [{k:'h',p:'cabecalho.png'},{k:'f',p:'rodape.png'},{k:'s',p:'assinatura.png'}];
+        function loadImages() {
+            const targets = [{id:'head', src:'cabecalho.png'}, {id:'sign', src:'assinatura.png'}, {id:'foot', src:'rodape.png'}];
             targets.forEach(t => {
-                const i = new Image();
-                i.onload = () => render();
-                i.onerror = () => { imgs[t.k] = ''; render(); };
-                i.src = t.p;
+                const img = new Image();
+                img.onload = () => render();
+                img.onerror = () => { images[t.id] = ''; render(); };
+                img.src = t.src;
             });
         }
 
         $('searchBox').oninput = function() {
             const val = this.value.toLowerCase();
-            const res = $('results');
-            if (val.length < 2) return res.classList.add('hidden');
-            const m = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)).slice(0, 5);
-            res.innerHTML = '';
-            res.classList.toggle('hidden', m.length === 0);
-            m.forEach(item => {
+            const resDiv = $('results');
+            if (val.length < 2) return resDiv.classList.add('hidden');
+            
+            const matches = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)).slice(0, 5);
+            resDiv.innerHTML = '';
+            resDiv.classList.toggle('hidden', matches.length === 0);
+            
+            matches.forEach(item => {
                 const d = document.createElement('div');
-                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm";
+                d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
                 d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
                 d.onclick = () => {
-                    selected = item;
-                    $('searchBox').value = item.a;
-                    res.classList.add('hidden');
-                    $('canvas').classList.remove('hidden');
-                    $('empty-state').classList.add('hidden');
-                    $('selectorArea').classList.remove('hidden');
-                    $('optMae').innerText = item.m || "(Vazio)";
-                    $('optPai').innerText = item.p || "(Vazio)";
-                    $('optResp').innerText = item.r || "(Vazio)";
-                    document.querySelector('input[value="mae"]').checked = true;
-                    $('manualName').classList.add('hidden');
-                    render();
+                    selectAluno(item);
+                    resDiv.classList.add('hidden');
                 };
-                res.appendChild(d);
+                resDiv.appendChild(d);
             });
         };
 
+        function selectAluno(item) {
+            selectedAluno = item;
+            $('searchBox').value = item.a;
+            $('canvas').classList.remove('hidden');
+            $('emptyState').classList.add('hidden');
+            $('guardianArea').classList.remove('hidden');
+            
+            // Atualiza labels dos responsáveis
+            $('lblMae').innerText = item.m || "(Vazio)";
+            $('lblPai').innerText = item.p || "(Vazio)";
+            $('lblResp').innerText = item.r || "(Vazio)";
+            
+            // Padrão: Mãe
+            document.querySelector('input[value="mae"]').checked = true;
+            $('manualName').classList.add('hidden');
+            render();
+        }
+
         function handleRespChange() {
-            const v = document.querySelector('input[name="respType"]:checked').value;
-            $('manualName').classList.toggle('hidden', v !== 'manual');
-            if(v === 'manual') $('manualName').focus();
+            const val = document.querySelector('input[name="resp"]:checked').value;
+            $('manualName').classList.toggle('hidden', val !== 'manual');
+            if (val === 'manual') {
+                $('manualName').focus();
+                $('manualName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             render();
         }
 
         function render() {
-            if (!selected) return;
-            const dv = $('docDate').value;
+            if (!selectedAluno) return;
+            
+            const rawDate = $('docDate').value;
             const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-            const [y, m, d] = dv.split('-');
-            const dataExt = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
+            const [y, m, d] = rawDate.split('-');
+            const dataExtenso = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
             const turno = $('docShift').value;
-            const type = document.querySelector('input[name="respType"]:checked').value;
-            let declName = "";
-            if (type === 'mae') declName = selected.m;
-            else if (type === 'pai') declName = selected.p;
-            else if (type === 'outro') declName = selected.r;
-            else declName = $('manualName').value;
-            if(!declName || declName === "") declName = "____________________";
-            const body = `Declaro para os devidos fins legais que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExt}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
-            const city = `Formosa-GO, ${dataExt}.`;
-            ['v', 'p'].forEach(prefix => {
-                $(prefix + 'Body').innerHTML = body;
-                $(prefix + 'Date').innerText = city;
-                $(prefix + 'Header').innerHTML = imgs.h ? `<img src="${imgs.h}" class="img-fluid">` : '';
-                $(prefix + 'Footer').innerHTML = imgs.f ? `<img src="${imgs.f}" class="img-fluid">` : '';
-                $(prefix + 'Sign').innerHTML = imgs.s ? `<img src="${imgs.s}" class="signature-img">` : '';
+
+            // Determina nome do declarante
+            const respType = document.querySelector('input[name="resp"]:checked').value;
+            let nomeDeclarante = "";
+            if (respType === 'mae') nomeDeclarante = selectedAluno.m;
+            else if (respType === 'pai') nomeDeclarante = selectedAluno.p;
+            else if (respType === 'outro') nomeDeclarante = selectedAluno.r;
+            else nomeDeclarante = $('manualName').value;
+
+            if (!nomeDeclarante || nomeDeclarante.trim() === "") nomeDeclarante = "__________________________________";
+
+            const corpoTexto = `Declaro para os devidos fins legais que, <strong>${nomeDeclarante.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExtenso}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selectedAluno.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
+            
+            const linhaLocal = `Formosa-GO, ${dataExtenso}.`;
+
+            // Renderiza na prévia e na impressão
+            ['v', 'p'].forEach(pre => {
+                $(pre + 'Body').innerHTML = corpoTexto;
+                $(pre + 'Date').innerText = linhaLocal;
+                $(pre + 'Header').innerHTML = images.head ? `<img src="${images.head}" class="img-header-footer">` : '';
+                $(pre + 'Footer').innerHTML = images.foot ? `<img src="${images.foot}" class="img-header-footer">` : '';
+                $(pre + 'Sign').innerHTML = images.sign ? `<img src="${images.sign}" class="signature-img">` : '';
             });
         }
+
+        $('docDate').onchange = () => render();
+        $('docShift').onchange = () => render();
     </script>
 </body>
 </html>
