@@ -121,6 +121,9 @@
                     <input type="text" id="searchBox" placeholder="Carregando CUBO.CSV..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
                     <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-96 overflow-y-auto hidden"></div>
                 </div>
+                <p class="text-[11px] text-slate-400 italic">
+                    Dica: digite uma letra, exemplo: F, para ver primeiro os nomes que começam com ela.
+                </p>
             </div>
 
             <!-- 3. Responsável -->
@@ -396,32 +399,71 @@
             }
         }
 
+        function startsWithAnyWord(text, search) {
+            const words = normalizeText(text).split(/\s+/).filter(Boolean);
+            return words.some(word => word.startsWith(search));
+        }
+
+        function getSmartSearchScore(item, search) {
+            const aluno = normalizeText(item.a);
+            const mae = normalizeText(item.m);
+            const pai = normalizeText(item.p);
+            const resp = normalizeText(item.r);
+
+            const responsaveis = [mae, pai, resp].filter(Boolean);
+
+            /*
+                Quanto menor o número, melhor a sugestão.
+
+                0 = Nome do aluno começa com a busca
+                1 = Alguma palavra do nome do aluno começa com a busca
+                2 = Nome de mãe, pai ou responsável começa com a busca
+                3 = Alguma palavra do responsável começa com a busca
+                4 = Nome do aluno contém a busca
+                5 = Responsável contém a busca
+                999 = Não encontrou
+            */
+
+            if (aluno.startsWith(search)) return 0;
+            if (startsWithAnyWord(aluno, search)) return 1;
+
+            if (responsaveis.some(nome => nome.startsWith(search))) return 2;
+            if (responsaveis.some(nome => startsWithAnyWord(nome, search))) return 3;
+
+            if (aluno.includes(search)) return 4;
+            if (responsaveis.some(nome => nome.includes(search))) return 5;
+
+            return 999;
+        }
+
         $('searchBox').oninput = function() {
             const val = normalizeText(this.value);
             const res = $('results');
 
             res.innerHTML = '';
 
-            if (val.length < 2) {
+            if (val.length < 1) {
                 res.classList.add('hidden');
                 return;
             }
 
-            const matches = db.filter(item => {
-                const aluno = normalizeText(item.a);
-                const mae = normalizeText(item.m);
-                const pai = normalizeText(item.p);
-                const resp = normalizeText(item.r);
+            const matches = db
+                .map(item => {
+                    return {
+                        item,
+                        score: getSmartSearchScore(item, val)
+                    };
+                })
+                .filter(result => result.score !== 999)
+                .sort((x, y) => {
+                    if (x.score !== y.score) {
+                        return x.score - y.score;
+                    }
 
-                return (
-                    aluno.includes(val) ||
-                    mae.includes(val) ||
-                    pai.includes(val) ||
-                    resp.includes(val)
-                );
-            });
+                    return x.item.a.localeCompare(y.item.a, 'pt-BR');
+                });
 
-            const limit = 20;
+            const limit = 30;
             const shown = matches.slice(0, limit);
 
             res.classList.remove('hidden');
@@ -435,7 +477,8 @@
                 return;
             }
 
-            shown.forEach(item => {
+            shown.forEach(result => {
+                const item = result.item;
                 const d = document.createElement('div');
 
                 const infoParts = [];
