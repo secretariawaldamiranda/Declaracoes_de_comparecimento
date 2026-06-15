@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,32 +118,37 @@
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Selecionar Aluno</h3>
                 <div class="relative">
-                    <input type="text" id="searchBox" placeholder="A carregar CUBO.CSV..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
-                    <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto hidden"></div>
+                    <input type="text" id="searchBox" placeholder="Carregando CUBO.CSV..." class="w-full border-2 border-slate-100 rounded-2xl p-4 text-base focus:border-blue-500 outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:cursor-not-allowed" disabled>
+                    <div id="results" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl max-h-96 overflow-y-auto hidden"></div>
                 </div>
             </div>
 
-            <!-- 3. Responsável (Dinamico) -->
+            <!-- 3. Responsável -->
             <div id="selectorArea" class="hidden space-y-4 animate-in slide-in-from-top duration-300">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Declarante</h3>
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 space-y-3">
                     <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="mae" checked onchange="handleRespChange()">
+
+                        <label id="labelMae" class="flex items-center gap-2 cursor-pointer">
+                            <input id="radioMae" type="radio" name="respType" value="mae" onchange="handleRespChange()">
                             <span class="text-slate-700">Mãe: <span id="optMae" class="font-bold"></span></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="pai" onchange="handleRespChange()">
+
+                        <label id="labelPai" class="flex items-center gap-2 cursor-pointer">
+                            <input id="radioPai" type="radio" name="respType" value="pai" onchange="handleRespChange()">
                             <span class="text-slate-700">Pai: <span id="optPai" class="font-bold"></span></span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="outro" onchange="handleRespChange()">
+
+                        <label id="labelResp" class="flex items-center gap-2 cursor-pointer">
+                            <input id="radioResp" type="radio" name="respType" value="outro" onchange="handleRespChange()">
                             <span class="text-slate-700">Responsável: <span id="optResp" class="font-bold"></span></span>
                         </label>
+
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="respType" value="manual" onchange="handleRespChange()">
-                            <span class="font-medium text-blue-600 italic">Outro (Digitar nome...)</span>
+                            <input id="radioManual" type="radio" name="respType" value="manual" onchange="handleRespChange()">
+                            <span class="font-medium text-blue-600 italic">Outro (digitar nome...)</span>
                         </label>
+
                     </div>
                     
                     <input type="text" id="manualName" placeholder="Digite o nome completo" class="hidden w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-400" oninput="render()">
@@ -219,54 +224,89 @@
         const $ = (id) => document.getElementById(id);
 
         window.onload = () => {
-            // Data Local
             const agora = new Date();
             const offset = agora.getTimezoneOffset();
-            const dataLocal = new Date(agora.getTime() - (offset*60*1000)).toISOString().split('T')[0];
+            const dataLocal = new Date(agora.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
             $('docDate').value = dataLocal;
 
-            // Turno Automático
             const hora = agora.getHours();
             let turno = "noturno";
-            if (hora >= 5 && hora < 12) turno = "matutino";
-            else if (hora >= 12 && hora < 18) turno = "vespertino";
+
+            if (hora >= 5 && hora < 12) {
+                turno = "matutino";
+            } else if (hora >= 12 && hora < 18) {
+                turno = "vespertino";
+            }
+
             $('docShift').value = turno;
 
             loadAssets();
             checkAndLoadDefaultCSV();
         };
 
+        function normalizeText(text) {
+            return String(text || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+        }
+
+        function escapeHTML(text) {
+            return String(text || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function isFilled(value) {
+            const v = String(value || "").trim().toLowerCase();
+
+            return (
+                v !== "" &&
+                v !== "-" &&
+                v !== "null" &&
+                v !== "undefined" &&
+                v !== "não informado" &&
+                v !== "nao informado"
+            );
+        }
+
         function checkAndLoadDefaultCSV() {
             fetch('CUBO.CSV')
                 .then(response => {
-                    if (!response.ok) throw new Error("Ficheiro não encontrado");
+                    if (!response.ok) throw new Error("Arquivo não encontrado");
                     return response.text();
                 })
                 .then(text => parseCSV(text))
                 .catch(err => {
                     console.error(err);
                     $('searchBox').placeholder = "CUBO.CSV não encontrado no GitHub.";
-                    // Em caso de erro, permitir carregar manualmente se o input existisse, 
-                    // mas como ocultamos, apenas mostramos a mensagem de erro.
                 });
         }
 
         function parseCSV(text) {
             const lines = text.split('\n').filter(line => line.trim() !== "");
-            if (lines.length < 1) return;
 
-            // Identificação dinâmica das colunas pelo cabeçalho
-            const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+            if (lines.length < 1) {
+                $('searchBox').placeholder = "CSV vazio ou inválido.";
+                return;
+            }
+
+            const headers = lines[0].split(';').map(h => normalizeText(h));
             
             const idx = {
                 aluno: headers.indexOf("aluno"),
-                mae: headers.findIndex(h => h.includes("mãe") || h.includes("mae")),
+                mae: headers.findIndex(h => h.includes("mae")),
                 pai: headers.indexOf("pai"),
-                resp: headers.findIndex(h => h.includes("responsável") || h.includes("responsavel"))
+                resp: headers.findIndex(h => h.includes("responsavel"))
             };
 
             db = lines.slice(1).map(l => {
                 const c = l.split(';');
+
                 return {
                     a: idx.aluno !== -1 ? (c[idx.aluno] || "").trim() : (c[0] || "").trim(),
                     m: idx.mae !== -1 ? (c[idx.mae] || "").trim() : (c[1] || "").trim(),
@@ -284,71 +324,250 @@
         }
 
         function loadAssets() {
-            const targets = [{k:'h',p:'cabecalho.png'},{k:'f',p:'rodape.png'},{k:'s',p:'assinatura.png'}];
+            const targets = [
+                { k: 'h', p: 'cabecalho.png' },
+                { k: 'f', p: 'rodape.png' },
+                { k: 's', p: 'assinatura.png' }
+            ];
+
             targets.forEach(t => {
                 const i = new Image();
+
                 i.onload = () => render();
-                i.onerror = () => { imgs[t.k] = ''; render(); };
+                i.onerror = () => {
+                    imgs[t.k] = '';
+                    render();
+                };
+
                 i.src = t.p;
             });
         }
 
+        function showResponsibleOptions(item) {
+            const options = [
+                {
+                    type: "mae",
+                    labelId: "labelMae",
+                    radioId: "radioMae",
+                    textId: "optMae",
+                    value: item.m
+                },
+                {
+                    type: "pai",
+                    labelId: "labelPai",
+                    radioId: "radioPai",
+                    textId: "optPai",
+                    value: item.p
+                },
+                {
+                    type: "outro",
+                    labelId: "labelResp",
+                    radioId: "radioResp",
+                    textId: "optResp",
+                    value: item.r
+                }
+            ];
+
+            let firstAvailableType = "";
+
+            options.forEach(option => {
+                const hasValue = isFilled(option.value);
+
+                $(option.labelId).classList.toggle("hidden", !hasValue);
+                $(option.radioId).disabled = !hasValue;
+                $(option.textId).innerText = hasValue ? option.value : "";
+
+                if (hasValue && firstAvailableType === "") {
+                    firstAvailableType = option.type;
+                }
+            });
+
+            const selectedType = firstAvailableType || "manual";
+            const radio = document.querySelector(`input[name="respType"][value="${selectedType}"]`);
+
+            if (radio) {
+                radio.checked = true;
+            }
+
+            $('manualName').classList.toggle('hidden', selectedType !== 'manual');
+
+            if (selectedType === 'manual') {
+                $('manualName').focus();
+            }
+        }
+
         $('searchBox').oninput = function() {
-            const val = this.value.toLowerCase();
+            const val = normalizeText(this.value);
             const res = $('results');
-            if (val.length < 2) return res.classList.add('hidden');
-            const m = db.filter(i => i.a.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)).slice(0, 5);
+
             res.innerHTML = '';
-            res.classList.toggle('hidden', m.length === 0);
-            m.forEach(item => {
+
+            if (val.length < 2) {
+                res.classList.add('hidden');
+                return;
+            }
+
+            const matches = db.filter(item => {
+                const aluno = normalizeText(item.a);
+                const mae = normalizeText(item.m);
+                const pai = normalizeText(item.p);
+                const resp = normalizeText(item.r);
+
+                return (
+                    aluno.includes(val) ||
+                    mae.includes(val) ||
+                    pai.includes(val) ||
+                    resp.includes(val)
+                );
+            });
+
+            const limit = 20;
+            const shown = matches.slice(0, limit);
+
+            res.classList.remove('hidden');
+
+            if (shown.length === 0) {
+                res.innerHTML = `
+                    <div class="p-4 text-sm text-slate-500 italic">
+                        Nenhum aluno encontrado.
+                    </div>
+                `;
+                return;
+            }
+
+            shown.forEach(item => {
                 const d = document.createElement('div');
+
+                const infoParts = [];
+
+                if (isFilled(item.m)) infoParts.push(`Mãe: ${escapeHTML(item.m)}`);
+                if (isFilled(item.p)) infoParts.push(`Pai: ${escapeHTML(item.p)}`);
+                if (isFilled(item.r)) infoParts.push(`Responsável: ${escapeHTML(item.r)}`);
+
                 d.className = "p-4 hover:bg-blue-50 cursor-pointer border-b last:border-0 text-sm transition-colors";
-                d.innerHTML = `<div><b class="text-slate-800 uppercase">${item.a}</b></div><div class="text-[10px] text-slate-400 uppercase font-bold">Mãe: ${item.m}</div>`;
+                d.innerHTML = `
+                    <div>
+                        <b class="text-slate-800 uppercase">${escapeHTML(item.a)}</b>
+                    </div>
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mt-1">
+                        ${infoParts.length > 0 ? infoParts.join(" • ") : "Sem responsável cadastrado"}
+                    </div>
+                `;
+
                 d.onclick = () => {
                     selected = item;
+
                     $('searchBox').value = item.a;
                     res.classList.add('hidden');
                     $('canvas').classList.remove('hidden');
                     $('empty-state').classList.add('hidden');
                     $('selectorArea').classList.remove('hidden');
-                    
-                    $('optMae').innerText = item.m || "(Vazio)";
-                    $('optPai').innerText = item.p || "(Vazio)";
-                    $('optResp').innerText = item.r || "(Vazio)";
-                    
-                    document.querySelector('input[value="mae"]').checked = true;
-                    $('manualName').classList.add('hidden');
+
+                    $('manualName').value = "";
+
+                    showResponsibleOptions(item);
                     render();
                 };
+
                 res.appendChild(d);
             });
+
+            if (matches.length > limit) {
+                const aviso = document.createElement('div');
+
+                aviso.className = "p-3 text-center text-[11px] text-slate-500 bg-slate-50 font-semibold";
+                aviso.innerText = `Mostrando ${limit} de ${matches.length} resultados. Digite mais letras para filtrar melhor.`;
+
+                res.appendChild(aviso);
+            }
         };
 
         function handleRespChange() {
-            const v = document.querySelector('input[name="respType"]:checked').value;
+            const selectedRadio = document.querySelector('input[name="respType"]:checked');
+
+            if (!selectedRadio) return;
+
+            const v = selectedRadio.value;
+
             $('manualName').classList.toggle('hidden', v !== 'manual');
-            if(v === 'manual') $('manualName').focus();
+
+            if (v === 'manual') {
+                $('manualName').focus();
+            }
+
             render();
+        }
+
+        function getDateText() {
+            const dv = $('docDate').value;
+            const meses = [
+                "janeiro",
+                "fevereiro",
+                "março",
+                "abril",
+                "maio",
+                "junho",
+                "julho",
+                "agosto",
+                "setembro",
+                "outubro",
+                "novembro",
+                "dezembro"
+            ];
+
+            if (!dv) {
+                return "____ de __________________ de ______";
+            }
+
+            const [y, m, d] = dv.split('-');
+            const monthIndex = parseInt(m, 10) - 1;
+
+            if (!y || !m || !d || monthIndex < 0 || monthIndex > 11) {
+                return "____ de __________________ de ______";
+            }
+
+            return `${d} de ${meses[monthIndex]} de ${y}`;
         }
 
         function render() {
             if (!selected) return;
-            const dv = $('docDate').value;
-            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-            const [y, m, d] = dv.split('-');
-            const dataExt = `${d} de ${meses[parseInt(m)-1]} de ${y}`;
+
+            const dataExt = getDateText();
             const turno = $('docShift').value;
 
-            const type = document.querySelector('input[name="respType"]:checked').value;
+            const selectedRadio = document.querySelector('input[name="respType"]:checked');
+
+            if (!selectedRadio) return;
+
+            const type = selectedRadio.value;
+
             let declName = "";
-            if (type === 'mae') declName = selected.m;
-            else if (type === 'pai') declName = selected.p;
-            else if (type === 'outro') declName = selected.r;
-            else declName = $('manualName').value;
 
-            if(!declName || declName === "") declName = "____________________";
+            if (type === 'mae') {
+                declName = selected.m;
+            } else if (type === 'pai') {
+                declName = selected.p;
+            } else if (type === 'outro') {
+                declName = selected.r;
+            } else {
+                declName = $('manualName').value;
+            }
 
-            const body = `Declaro para os devidos fins legais que, <strong>${declName.toUpperCase()}</strong>, compareceu nesta Unidade Escolar no dia <strong>${dataExt}</strong>, no turno <strong>${turno}</strong>, para resolver assuntos relacionados a <strong>${selected.a.toUpperCase()}</strong>.<p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>`;
+            if (!isFilled(declName)) {
+                declName = "____________________";
+            }
+
+            const body = `
+                Declaro para os devidos fins legais que, 
+                <strong>${escapeHTML(declName.toUpperCase())}</strong>, 
+                compareceu nesta Unidade Escolar no dia 
+                <strong>${escapeHTML(dataExt)}</strong>, 
+                no turno 
+                <strong>${escapeHTML(turno)}</strong>, 
+                para resolver assuntos relacionados a 
+                <strong>${escapeHTML(selected.a.toUpperCase())}</strong>.
+                <p style="margin-top: 35px;">Por ser verdade assino a presente declaração.</p>
+            `;
             
             const city = `Formosa-GO, ${dataExt}.`;
 
